@@ -1,0 +1,360 @@
+<div id="tenders-offers" class="page-layout carded fullwidth inner-scroll">
+
+    <!-- TOP BACKGROUND -->
+    <div class="top-bg accent"></div>
+    <!-- / TOP BACKGROUND -->
+
+    <!-- CENTER -->
+    <div class="center">
+
+        <!-- HEADER -->
+        <div class="header accent"
+             fxLayout="column" fxLayoutAlign="center center"
+             fxLayout.gt-xs="row" fxLayoutAlign.gt-xs="space-between center">
+
+            <!-- APP TITLE -->
+            <div class="logo mb-24 mb-sm-0"
+                 fxLayout="row" fxLayoutAlign="start center">
+                <mat-icon class="logo-icon s-32 mr-16" [@animate]="{value:'*',params:{delay:'50ms',scale:'0.2'}}">
+                    receipt
+                </mat-icon>
+                <span class="logo-text h1" [@animate]="{value:'*',params:{delay:'100ms',x:'-25px'}}">New Offer</span>
+            </div>
+            <!-- / APP TITLE -->
+
+        </div>
+        <div class="content-card">
+            <mat-horizontal-stepper [linear]="isLinear" #stepper style="background: rgba(255,255,255,0.6);border-radius: 0px 0px 5px 5px;min-width:70%;overflow: scroll;" cdkScrollable>
+                <mat-step [stepControl]="firstFormGroup" [editable]="isLinear" >
+                    <ng-template matStepLabel>Select Prices</ng-template>
+        
+                    <form [formGroup]="firstFormGroup" *ngIf="!isLoading" style="width: 100%;">
+                        <mat-form-field appearance="fill" style="min-width: 400px;">
+                            <mat-label>Select Tender</mat-label>
+                             
+                            <input type="text"
+                            placeholder="Start with first letter ..."
+                             matInput
+                             formControlName="selectedTender"
+                            [matAutocomplete]="autoTenders">
+                            <mat-autocomplete autoActiveFirstOption #autoTenders="matAutocomplete">
+                                <mat-option *ngFor="let option of tendersList" [value]="option">
+                                    {{option.name}}
+                                </mat-option>
+                            </mat-autocomplete>
+                        </mat-form-field>
+                    
+                        <table class="simple centred scroll-width" style="position: relative;" *ngIf="!!tenderPricingList?.prices">
+                            <thead style="position: absolute; background: #fff; left: 0px; top: 0px; z-index: 999; width: 100%;">
+                                <tr style="width: 100%; display: inline-flex; ">
+        
+                                    <th *ngFor="let colName of  tenderPricingList.attr " [style.width]=" (100/( tenderPricingList.attr).length)+'%'  ">
+                                        {{colName}}   
+                                    </th>
+                                 </tr>
+                            </thead>
+                            <tbody style="max-height: 500px; overflow: scroll; display:block;padding-top: 3.4em;width:100%;">
+                              
+                                <ng-container *ngFor="let price of tenderPricingList.prices ">
+
+                                     <div class="table-row" 
+                                        *ngFor="let result of price.results; let last = last;"
+                                        [class.selected-row]="selectedPricingResultsIds.includes(getPriceIdFromPricingResults(result))"  
+                                        (click)="addRemovePrice(price,getPriceIdFromPricingResults(result)) " 
+                                         > 
+                                             <tr class="row-data">                                                
+                                                <td *ngFor="let colsName of tenderPricingList.attr ; let index=index;"
+                                                    [style.width]=" (100/(tenderPricingList.attr.length))+'%'  "
+                                                    >   
+                                                    <span *ngFor="let priceResult of  result ">
+                                                         
+                                                       
+                                                        <ng-container *ngIf="colsName  ">
+                                                            {{priceResult[colsName]}}
+                                                          
+                                                        </ng-container>
+                                                        
+                                                    </span>
+                                                    
+                                                </td>
+            
+                                            </tr>
+                                            <tr class="row-tags" >
+                                                <td [colSpan]=" objectKeys(editedPricingTable).length  ">
+                                                     <button mat-stroked-button *ngFor="let site of price.sites" class="table-tag color-blue" >Site:{{site}} </button>
+                                                    <button mat-stroked-button class="table-tag color-green" >PricingType:{{price.type}} </button>
+                                                    <button mat-stroked-button class="table-tag color-yellow" >{{price.capacity | kwToMw }} </button>
+                                                    <button mat-stroked-button class="table-tag red-900-border border " >{{moment(price.start_date).tz("Europe/Berlin").format('DD/MM/YYYY')}} - {{getPriceDateDifference(price.start_date,price.end_date)}} - {{moment(price.end_date).tz("Europe/Berlin").format('DD/MM/YYYY')}}  </button>
+            
+                                                </td>
+                                                    
+                                            </tr>
+                                    
+                                    </div>
+                                </ng-container>
+                                <ng-container *ngIf="!tenderPricingList.prices?.length  ">
+                                    <p style="text-align: center; padding: 1em 0px 3em 0px;">We couldn't find any pricing for the selected tender , probably no pricing was approved or does not exist.</p>
+                                </ng-container>
+                                
+
+                            </tbody>
+                        </table> 
+                        <br/>
+                         <button mat-raised-button color="primary"  matStepperNext  *ngIf="!!tenderPricingList.prices"  [disabled]="!selectedPricingResultsIds.length"  >Add ({{selectedPricingResultsIds.length}}) prices</button>
+                        
+                    </form>
+                    <div  fxLayout="column" fxLayoutAlign="center center" fxFlex *ngIf="isLoading" style="height: 500px;">
+                        <mat-spinner ></mat-spinner>
+                    </div>
+                    
+        
+                </mat-step>
+                <mat-step [stepControl]="secondFormGroup"  fxLayout="column" [editable]="isLinear">
+                    <ng-template matStepLabel>Update Table</ng-template>
+                    <div  fxLayout="column" >
+                                    <form fxLayout="column" >
+                                        <h1>Update table pricings and columns</h1>
+                                        <div fxLayout="row" fxLayoutAlign="end" class="mb-24"  >
+                                             <button mat-button mat-raised-button color="primary" [matMenuTriggerFor]="menu">   
+                                                 <mat-icon>more_vert</mat-icon>
+                                                Add Formulas</button>
+                                            <mat-menu #menu="matMenu">
+                                                <button mat-menu-item (click)="addFixedPricingFormulas()" >Fixed Pricing</button>
+                                                <button mat-menu-item (click)="addCMFormulas()" >Commercial Margin</button>
+                                                <button mat-menu-item   (click)="isEditAllPricingFomulaSelected=!isEditAllPricingFomulaSelected">Edit All</button> 
+                                            </mat-menu>
+                                        </div>
+                                       
+                                        <table class="simple centred scroll-width" style="position: relative;" fxFlex *ngIf="!isLoading" >
+                                                        <thead style="position: absolute; background: #fff; left: 0px; top: 0px; z-index: 999; width: 100%;">
+                                                            <tr style="width: 100%; display: inline-flex; ">
+                                                                <th></th>
+                                                                <th *ngFor="let colName of  editedPricingTable.attr " [style.width]=" (100/(editedPricingTable.attr).length)+'%'  " 
+                                                                (mouseenter)="colomnSelected = colName" (mouseleave)="colomnSelected = null">
+                                                                    <mat-icon *ngIf="colomnSelected == colName "   (click)="removePricingColomn( colName)" style="cursor: pointer;">remove_circle_outline</mat-icon> <br/> 
+                                                                    <input value="{{colName}}"  (change)="updateEditPricingTable(colName , null,$event)" *ngIf="isColumnNameNotInTheFomulas(colName)"/>  
+                                                                    <span *ngIf="!isColumnNameNotInTheFomulas(colName)">{{colName}}</span>
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody style="max-height: 500px; overflow: scroll; display:block;padding-top: 3.4em;width:100%;padding-top: 6em;">
+                                                           <ng-container *ngFor="let price of editedPricingTable.prices ">
+                                                            <div class="table-row" 
+                                                            *ngFor="let result of price.results;let index = index; let last = last;"
+                                                           >
+                                                               <tr class="row-data" >
+                                                                <td> 
+                                                                    <input type="checkbox" mat-checkbox 
+                                                                            [(ngModel)]="checkedPricingIdsForFormulats[getPriceIdFromPricingResults(result)]" name="checkbox-{{index}}"
+                                                                              />
+                                                                          
+                                                                </td>   
+                                                                <td *ngFor="let colsName of editedPricingTable.attr ; let index = index;"
+                                                                       [style.width]=" (100/(editedPricingTable.attr).length)+'%'  "
+                                                                       >
+                                                                       <ng-container *ngFor="let priceResult of  result ;let last = last; ">
+                                                                             
+                                                                                  
+                                                                                <span *ngIf="priceResult[colsName] ">
+                                                                                    <input value="{{priceResult[colsName]}}" 
+                                                                                             (change)="updateEditPricingTable(colsName , getPriceIdFromPricingResults(result),$event)" 
+                                                                                             *ngIf="isEditAllPricingFomulaSelected || isAttributeFromTheFormulat(colsName) && isFixedPricingFormulasSelected ||   isAttributeFromTheFormulat(colsName) && isCMFormulatSelected"
+                                                                                             />
+
+                                                                                            <ng-container  *ngIf="(!isEditAllPricingFomulaSelected &&  !isFixedPricingFormulasSelected) || (!isEditAllPricingFomulaSelected && isFixedPricingFormulasSelected && !isAttributeFromTheFormulat(colsName)) || (!isEditAllPricingFomulaSelected && isCMFormulatSelected && !isAttributeFromTheFormulat(colsName))">
+                                                                                                {{priceResult[colsName]}}
+                                                                                            </ng-container> 
+                                                                                  </span>
+                                                                          
+                                                                               
+                                                                            
+                                                                        </ng-container>
+                                                                        
+                                                                   </td>
+                                                                   
+   
+                                                               </tr>
+                                                               <tr class="row-tags"   >
+                                                                   <td [colSpan]=" objectKeys(editedPricingTable).length  ">
+                                                                        <button mat-stroked-button *ngFor="let site of price.sites" class="table-tag color-blue" >Site:{{site}} </button>
+                                                                       <button mat-stroked-button class="table-tag color-green" >PricingType:{{price.type}} </button>
+                                                                       <button mat-stroked-button class="table-tag color-yellow" >{{price.capacity | kwToMw }}</button>
+                                                                       <button mat-stroked-button class="table-tag red-900-border border " >{{moment(price.start_date).tz("Europe/Berlin").format('DD/MM/YYYY')}} - {{getPriceDateDifference(price.start_date,price.end_date)}} - {{moment(price.end_date).tz("Europe/Berlin").subtract(1, "days").format('DD/MM/YYYY')}}  </button>
+   
+                                                                   </td>
+                                                                       
+                                                               </tr>
+                                                               
+                                                           
+                                                           </div>
+                                                           </ng-container>
+                                                           
+                                                        </tbody>
+                                        </table>
+                                        <br/>
+                                        <mat-card *ngIf="isFixedPricingFormulasSelected || isCMFormulatSelected">
+                                            <mat-card-title> Please fill out a value for following bricks:</mat-card-title>
+                                            <mat-card-content>	
+                                                     <div  fxLayout="column" fxLayoutAlign="center center" fxFlex *ngFor="let formulat of formulasList;let index = index" >
+                                                        <span>{{formulat.name}}</span>
+
+                                                        <mat-form-field  appearance="outline" class="pb-4 pt-4 ml-16">
+                                                            <input matInput [(ngModel)]="formulasInputValues[formulat.attr]" name="formulat-{{index}}"/>
+                                                        </mat-form-field>
+                                                       
+                                                        <mat-card-actions>	
+                                                            <button mat-raised-button    (click)="applyFormulatForAllTableResults(formulat.attr)">Apply to table </button>
+                                                            <button mat-raised-button  (click)="applyFormulatForSelectedResults(formulat.attr)"> Apply to selected </button>
+                                                        </mat-card-actions>
+                                                    </div>
+                                                   
+                                             </mat-card-content>
+                                        </mat-card>
+
+                            
+                                    </form>
+                                    <div fxLayout="column" fxLayoutAlign="center center"  class="mt-16" *ngIf="!isLoading" >
+                                        <div>
+                                            <button mat-raised-button color="primary"  
+                                            matStepperPrevious  
+                                            class="mr-16"
+                                            >
+                                            Back
+                                          </button>
+
+                                             <button mat-raised-button color="accent"  
+                                            matStepperNext  
+                                            class="mr-16"
+                                            [disabled]="!selectedPricingResultsIds.length" 
+                                            (click)="generateTablePricings()">
+                                            Create Offer
+                                    </button>
+                                    <button mat-raised-button color="accent"  
+                                            matStepperNext  
+                                            [disabled]=" !isCMFormulatSelected || !isFixedPricingFormulasSelected" 
+                                            (click)="generateClassicTable = true; generateTablePricings()"
+                                            >
+                                            Create basic Offer
+                                    </button>
+
+                                        </div>
+                                       
+                                     </div>
+                                    
+                                    <div  fxLayout="column" fxLayoutAlign="center center" fxFlex *ngIf="isLoading" style="height: 500px;">
+                                        <mat-spinner ></mat-spinner>
+                                    </div>
+                    </div>
+                    
+                </mat-step>
+                <mat-step fxLayout="column"  [editable]="isLinear">
+                    <ng-template matStepLabel>Generate Table</ng-template>
+                    <ng-container *ngIf="isLoading">
+                        <div  fxLayout="column" fxLayoutAlign="center center" fxFlex style="height: 500px;" >
+                            <mat-spinner ></mat-spinner>
+                        </div>
+                    </ng-container>
+                    <div *ngIf="!isLoading" fxLayout="column" fxFlex    >
+
+                        <div  >
+                            <button mat-raised-button color="primary"   class="mb-20 mr-20" (click)="copyGeneratedTable()">Copy table</button>
+            
+                        </div>
+                        
+                        <table class="simple centred scroll-width" style="position: relative;" *ngIf="!!editedPricingTable.prices && !generateClassicTable" #generatedTable>
+                            <thead style="position: absolute; background: #fff; left: 0px; top: 0px; z-index: 999; width: 100%;">
+                                <tr style="width: 100%; display: inline-flex; ">
+                                    <ng-container  *ngFor="let colName of  editedPricingTable.attr ">
+                                        <th [style.width]=" (100/( editedPricingTable.attr.length -1))+'%'  ">
+                                            {{colName}}   
+                                        </th>
+                                    </ng-container>
+                                  
+                                </tr>
+                            </thead>
+                            <tbody style="max-height: 500px; overflow: scroll; display:block;padding-top: 3.4em;width:100%;">
+                                <div class="table-row"   *ngFor="let price of editedPricingTable.prices "  >
+                                        <tr class="row-data"  *ngFor="let result of price.results; let last = last;">
+                                            <ng-container *ngFor="let colsName of editedPricingTable.attr ; let index=index;">
+
+                                                <td   [style.width]=" (100/(editedPricingTable.attr.length - 1))+'%'  "
+                                                >  
+                                                    <span  *ngFor="let priceResult of  result; let pIndex=index; ">
+                                                        
+                                                         
+                                                        <ng-container *ngIf="priceResult[colsName] ">
+                                                          
+                                                                 
+                                                                {{priceResult[colsName]}}                                                                                    
+                                                         
+                                                        </ng-container>
+                                                        
+                                                    </span>
+                                                
+                                                </td>
+                                            
+                                             </ng-container>
+            
+                                        </tr>
+                                        
+                                    
+                                    </div>
+                            </tbody>
+                        </table>
+                        <table class="simple centred scroll-width" style="position: relative;" *ngIf="!!editedPricingTable.prices && generateClassicTable" #generatedTable>
+                            <thead style="position: absolute; background: #fff; left: 0px; top: 0px; z-index: 999; width: 100%;">
+                                <tr style="width: 100%; display: inline-flex; ">
+                                    <th   [style.width]=" (100/5)+'%'  ">
+                                       Site name
+                                   </th>
+                                   <th   [style.width]=" (100/5)+'%'  ">
+                                      capacity
+                                  </th>
+                                  <th   [style.width]=" (100/5)+'%'  ">
+                                     start  
+                                 </th>
+                                 <th   [style.width]=" (100/5)+'%'  ">
+                                    end
+                                </th>
+                                <th   [style.width]=" (100/5)+'%'  ">
+                                   Price   
+                               </th>
+                                   
+                                </tr>
+                            </thead>
+                            <tbody style="max-height: 500px; overflow: scroll; display:block;padding-top: 3.4em;width:100%;">
+                                <div class="table-row"   *ngFor="let price of editedPricingTable.prices "  >
+                                        <tr class="row-data"  *ngFor="let result of price.results; let last = last;">
+ 
+                                                <td   [style.width]=" (100/5)+'%'  " >  
+                                                    {{getPriceSitesAsString(price.sites)}}
+                                                </td>  
+                                                <td   [style.width]=" (100/5)+'%'  " >  
+                                                    {{price.capacity| kwToMw }}
+                                                </td>  
+                                                <td   [style.width]=" (100/5)+'%'  " >  
+                                                    {{moment(price.end_date).tz("Europe/Berlin").format('DD/MM/YYYY')}}
+                                                </td>  
+                                                <td   [style.width]=" (100/5)+'%'  " >  
+                                                    {{moment(price.end_date).tz("Europe/Berlin").subtract(1, "days").format('DD/MM/YYYY')}}
+                                                </td>  
+                                                <td   [style.width]=" (100/5)+'%'  " >  
+                                                    {{getPriceCalculated(result,isCMFormulatSelected?'CM':'fixedPrice')}}
+                                                </td>  
+            
+                                        </tr>
+                                        
+                                    
+                                    </div>
+                            </tbody>
+                        </table>
+                        
+                    </div>
+                </mat-step>
+        
+              </mat-horizontal-stepper>
+              
+         </div>
+    </div>
+</div>
+ 

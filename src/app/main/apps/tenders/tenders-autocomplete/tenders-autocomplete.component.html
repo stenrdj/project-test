@@ -1,0 +1,10 @@
+<form [formGroup]="form" (ngSubmit)="submit()">
+    <div class="search" fxFlex fxLayout="row" fxLayoutAlign="start center">
+
+        <button type="submit" mat-icon-button>
+            <mat-icon>search</mat-icon>
+        </button>
+        <input type="text" placeholder="Search for an tenders" aria-label="Number" [formControl]="myControl">
+        
+    </div>
+</form>

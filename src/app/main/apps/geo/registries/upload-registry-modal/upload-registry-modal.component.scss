@@ -1,0 +1,64 @@
+.uploadfile-button {
+    border: 1px dashed #009688  !important;
+    max-width:420px;
+    width: 100%;
+    height:100px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:20px auto;
+    padding: 20px;
+    &.emptyFile{
+        cursor: pointer;
+    }
+}
+::ng-deep{
+    .mat-dialog-content{
+        text-align: center;
+    }
+    .mat-radio-button ~ .mat-radio-button {
+        margin-left: 16px;
+      }
+    .mat-radio-button{
+        padding: 7px 19px 5px 12px;
+
+        &.mat-radio-checked{
+            font-weight: bold;
+            background: #ccc;
+            padding: 7px 19px 5px 12px;
+            border-radius: 10px;
+        }
+    }
+    .mat-radio-button.FR {
+        .mat-radio-label-content:before{
+            content: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAnUlEQVRYw2NgGAWjYIABIwOvpSoDm5QWIYViwpwMFRnGDIyMhA39Pnsxw/+37wiqu/Xz+zUWBm7dIAZu/Q5CigXlBRgKC6OI8tWH3ScY/v1/RFDd3i/vK1gGOgpGHTDqgFEHjDpg1AGjDhh1wKgDRh3AwvDlwjqGXy9vEFL49j4HQ3v7I6IapT/u3WD49/Y9QXV3f32/NtovGAUDDgCSgChSwI8E9AAAAABJRU5ErkJggg==')
+            ;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        .mat-radio-container{
+            display: none;
+        }
+    }
+    .mat-radio-button.DE {
+        .mat-radio-label-content:before{
+            content: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAhUlEQVRYw+2WsQ3CQBAE5+RzyidPaukTRA/kUAKlfEZKW+TuwHLmNpAggB428I508Y10q9OCMXsngAacRPsXgA58RNNTfQIL6AUKMIqWv4F8AjeRwAvIED8hh1AvEPF/iooMBGR9wHTRCBxnyOEAWTUCQ3EILQBxv9LOTVPJ1u1XyYzZN1+KoSmnkV71rgAAAABJRU5ErkJggg==');
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        .mat-radio-container{
+            display: none;
+        }
+    }
+    .mat-radio-button.NL {
+        .mat-radio-label-content:before{
+            content: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAmklEQVRYw2NgGAWjYIABozMXv6ocK7vWQFj+9M+vaywmnDxB5py8HQPhgPM/vlSwDHQUjDpg1AEskq6ODMrqA5ILGV7cvc3AIh8ezKAXEDAgDni2Y8doGhh1wCBwwModlxkuP+cbEMtvXb3AwLLv5F2Gk/c5B8QB397cGU0Dow4YeAcw8kgaqbLyiA9Idfj765tro/2CUTDgAADQxyLq8fzFZQAAAABJRU5ErkJggg==');
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        .mat-radio-container{
+            display: none;
+        }
+    }
+   
+}

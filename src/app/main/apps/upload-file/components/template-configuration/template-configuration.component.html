@@ -1,0 +1,81 @@
+<div *ngIf="colsFromFile && target" fxFlex="1 0 auto" fxLayout="column">
+
+    <div>
+        
+
+        <div class="example-container">
+            <h2>Target</h2>
+
+            <div cdkDropList [cdkDropListData]="target" class="example-list disabled-list" cdkDropListDisabled (cdkDropListDropped)="drop($event)">
+                <ng-container *ngFor="let item of target | keyvalue">
+                    <div class="example-box target-item item_title title_without_icon"  cdkDrag [cdkDragDisabled]="true">
+                        {{item.key}}
+                    
+                    </div> 
+                    <ng-container *ngFor="let attr of item.value | keyvalue">
+                        <div  class="example-box target-item  "   cdkDrag  *ngIf=" attr.value?.constructor.name != 'Object' ">
+                            <mat-icon class="  mr-18 secondary-text">keyboard_return</mat-icon>  {{attr.key}}  
+                        </div>
+                        <div  class="example-box target-item item_title_level item_title"   cdkDrag  *ngIf="attr.value?.constructor.name == 'Object'">
+                            <mat-icon class="  mr-18 secondary-text">keyboard_return</mat-icon> {{attr.key}}  
+                        </div>
+                        <ng-container *ngIf="attr.value?.constructor.name == 'Object'" >
+                            <div  class="example-box target-item item_single item_single_level"   cdkDrag  *ngFor="let attrLevel of attr.value | keyvalue">
+                                <mat-icon class="  mr-18 secondary-text">keyboard_return</mat-icon> {{attrLevel.key}} 
+                            </div>
+                        </ng-container>
+                        
+                    </ng-container>
+                    
+                </ng-container>
+                
+            </div>
+        </div>
+
+        <div class="example-container">
+            <h2>From import file</h2>
+
+            <div cdkDropList 
+                #mappedList="cdkDropList" 
+                [cdkDropListConnectedTo]="[notMappedList]"
+                 [cdkDropListData]="colsFromFile.sorted" 
+                 class="example-list" 
+                 (cdkDropListDropped)="drop($event)"   
+                 cdkDropListAutoScrollDisabled
+                 >
+                    <div class="example-box" 
+                        *ngFor="let item of colsFromFile.sorted" 
+                        cdkDrag  
+                        [cdkDragDisabled]="item == '__disabled__'" 
+                        [class.empty]=" !item || item == '__disabled__' " 
+                        [class.disabled]=" item == '__disabled__' ">
+                        {{item == '__disabled__' ? '': item}} <strong class="preview-header_content">{{getPreviewDataOfColName(item)}}</strong>
+                    </div>
+            </div>
+        </div>
+        
+    </div>
+    <div style="position: fixed;right: 0px; top:0%;z-index:99999; height: 100vh;max-width:100vh;overflow:scroll;background: #fff;" *ngIf="colsFromFileNotMapped.length > 2">
+        <h2>Unmapped File Columns:</h2>
+        <div cdkDropList  
+            #notMappedList="cdkDropList" 
+            [cdkDropListConnectedTo]="[mappedList]"
+            [cdkDropListData]="colsFromFileNotMapped" 
+            class="example-list" 
+            (cdkDropListDropped)="drop($event)"   
+            cdkDropListAutoScrollDisabled
+            >
+                <div class="example-box"
+                     *ngFor="let item of colsFromFileNotMapped" 
+                     cdkDrag 
+                     [cdkDragDisabled]="item == '__disabled__'" 
+                     [class.empty]=" !item || item == '__disabled__' " 
+                     [class.disabled]=" item == '__disabled__' ">
+                     {{item == '__disabled__' ? '': item}}
+                     <strong class="preview-header_content">{{getPreviewDataOfColName(item)}}</strong>
+                </div>
+        </div>
+    </div>
+    
+
+</div>

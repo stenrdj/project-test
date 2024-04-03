@@ -1,0 +1,33 @@
+<h1 mat-dialog-title>Upload Registry file</h1>
+<div mat-dialog-content>
+
+	<form [formGroup]="fileForm">
+		<span style="text-align: left;width: 100%;display: inline-block;">1- Upload file</span>
+		<div fxflex="1 0 auto" fxlayout="row" style="align-items: center!important;">
+			<input style="display: none" type="file" (change)="onFileChanged($event)" #fileInput   accept=".csv, application/vnd.ms-excel">
+
+			<div  type="button"  appFileDragDrop (onFileDropped)="dragFile($event)"  color="primary" class="uploadfile-button" (click)="fileInput.click()" [class.emptyFile]="!selectedFile">
+				<div *ngIf="!selectedFile">
+					Drag / Click to Select File
+				</div>
+				<div *ngIf="selectedFile">
+					File selected:
+					<span style="color:#009688;display: block;word-break: break-all;">{{selectedFile.name}}</span>
+					<mat-progress-bar *ngIf="uploading" mode="buffer" [value]="progress"></mat-progress-bar>
+					<span style="color:red;display: block;" *ngIf="errorMessage">Error :
+						{{errorMessage}}</span>
+				</div>
+			</div>
+
+		</div>
+		<span style="text-align: left;width: 100%;display: inline-block;">2- Choose country</span>
+		<mat-radio-group formControlName="country" aria-label="Select an Country" fxflex="1 0 auto" fxlayout="row" style="text-align: center;  width: 100%; display: inline-block;">
+			<mat-radio-button value="FR" class="FR">FR
+			</mat-radio-button>
+			<mat-radio-button value="DE" class="DE">DE</mat-radio-button>
+			<mat-radio-button value="NL" class="NL">NL</mat-radio-button>
+		</mat-radio-group>
+		<a mat-raised-button color="primary" class="ml-16 mt-32" (click)="startUploadRegistry()" [disabled]="!fileForm.valid" >Upload</a>
+
+	</form>
+</div>

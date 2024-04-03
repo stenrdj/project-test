@@ -1,0 +1,62 @@
+.registry-file-container {
+    display: flex;
+    padding: 10px;
+    &.errors{
+        border: 1px solid red;
+        .registry-file_icon{
+            color:red
+        }
+        .registry-file_action span{
+            color:red
+        }
+    }
+    &.success{
+        border: 1px solid green;
+        .registry-file_icon{
+            color:green
+        }
+        .registry-file_action span{
+            color:green
+        }
+
+    }
+    
+}
+.registry-file-status{
+    .error-row{
+        display: flex;
+        border: 1px solid red;
+        border-top: 0px;
+        &_number{
+            width: 70px;
+            padding: 10px;
+
+        }
+        &_message{
+            padding: 10px;
+        }
+    }
+}
+
+.registry-file_icon {
+    width: 40px;
+    align-items: center;
+    display: flex;
+}
+
+.registry-file_title {
+    align-items: center;
+    display: flex;
+    width: calc(100% - 40px );
+}
+
+.registry-file_action {
+    align-items: center;
+    display: flex;
+    color: red;
+    cursor: pointer;
+    justify-content: flex-end;
+    min-width: 130px;
+
+}
+ 

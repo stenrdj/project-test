@@ -1,0 +1,346 @@
+<h1 mat-dialog-title>Pricing Request</h1>
+<div mat-dialog-content>
+
+  <form [formGroup]="pricingObjectForm" *ngIf="!showMatrixTable">
+
+    <div fxLayout="row">
+
+      <mat-form-field appearance="outline">
+        <mat-label>Sites</mat-label>
+        <mat-chip-list #chipList aria-label="Add Site">
+          <mat-chip *ngFor="let site of sites" [selectable]="selectable" [removable]="removable"
+            (removed)="remove(site,'site')">
+            {{site}}
+            <mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+          </mat-chip>
+          <input placeholder="New site..." #siteInput name="site" formControlName="site" [matAutocomplete]="auto"
+            [matChipInputFor]="chipList" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+            *ngIf="sites.length < allSites.length" (matChipInputTokenEnd)="add($event)">
+        </mat-chip-list>
+        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event,'site')">
+          <mat-option *ngFor="let site of filtredSites | async" [value]="site">
+            {{site}}
+          </mat-option>
+        </mat-autocomplete>
+
+      </mat-form-field>
+      <button mat-raised-button type="button" color="accent" style="height: 100%;margin: 15px;"
+        (click)="addAllSitesToList()"> All Sites </button>
+
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Pricing Type</mat-label>
+      <mat-select formControlName="pricingType" multiple>
+        <mat-option *ngFor="let priceList of pricingTypeList" [value]="priceList">{{priceList}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <div fxLayout="row" *ngFor="let elem of allPeriodes;let first = first;let last = last;">
+      <mat-form-field appearance="outline" formGroupName="{{elem}}">
+        <mat-label>Start date</mat-label>
+        <input matInput [matDatepicker]="pickerStart" formControlName="start">
+        <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
+        <mat-datepicker #pickerStart></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" formGroupName="{{elem}}">
+        <mat-label>End date</mat-label>
+        <input matInput [matDatepicker]="pickerEnd" formControlName="end">
+        <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+        <mat-datepicker #pickerEnd></mat-datepicker>
+      </mat-form-field>
+      
+      <button mat-raised-button type="button" color="accent" style="height: 100%;margin: 15px;"
+        (click)="removeDateField(elem)" *ngIf="!first">-</button>
+
+
+    </div>
+
+    <button mat-raised-button type="button" color="accent" style="height: 100%;margin: 15px;"
+      (click)="addNewDateField()">+ Date range</button>
+    <button mat-raised-button type="button" color="primary" [disabled]="!pricingObjectForm.valid"
+      (click)="initiatCreation(isRequestPortfolio = true)"> Create
+      <ng-container *ngIf="isLoading && isRequestPortfolio">
+        <ng-container *ngIf="isLoading && isRequestPortfolio">
+          {{numberOfSuccesRequests}} / {{combinationList?.length}}
+          <svg xmlns="http://www.w3.org/2000/svg" 
+                xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; " width="50px" height="50px"
+                viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+                <g transform="rotate(0 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.9166666666666666s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(30 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.8333333333333334s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(60 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.75s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(90 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.6666666666666666s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(120 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.5833333333333334s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(150 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.5s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(180 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.4166666666666667s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(210 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.3333333333333333s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(240 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.25s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(270 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.16666666666666666s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(300 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.08333333333333333s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(330 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="0s" repeatCount="indefinite">
+                    </animate>
+                  </rect>
+                </g>
+              </svg>
+        </ng-container>
+      </ng-container>
+      
+    
+    </button>
+    <button mat-raised-button type="button" color="accent" [disabled]="!pricingObjectForm.valid"
+      (click)="initiatCreation(isRequestPortfolio = false)" *ngIf="sites.length > 1" class="ml-20"> Create
+      Seperately
+
+      <ng-container *ngIf="isLoading && !isRequestPortfolio">
+        {{numberOfSuccesRequests}} / {{combinationList?.length}}
+          <svg xmlns="http://www.w3.org/2000/svg" 
+                xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; " width="50px" height="50px"
+                viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+                <g transform="rotate(0 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.9166666666666666s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(30 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.8333333333333334s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(60 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.75s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(90 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.6666666666666666s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(120 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.5833333333333334s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(150 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.5s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(180 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.4166666666666667s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(210 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.3333333333333333s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(240 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.25s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(270 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.16666666666666666s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(300 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.08333333333333333s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(330 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="0s" repeatCount="indefinite">
+                    </animate>
+                  </rect>
+                </g>
+              </svg> 
+      </ng-container>  
+    </button>
+
+  </form>
+  <div class="matrix-block" *ngIf="showMatrixTable">
+    <h4>More then 30 pricing requests were generated. Please select the ones you request :</h4>
+    <ul *ngFor="let request of combinationList ">
+      <li>
+        <mat-checkbox [(ngModel)]="request.isChecked" style="line-height: 0px;"> </mat-checkbox>
+
+      </li>
+      <li>
+        {{request.site.join(' ,')}}
+      </li>
+      <li>
+        {{request.pricingType}}
+      </li>
+      <li>
+        {{moment(request.start).tz("Europe/Berlin").format('DD/MM/YYYY')}}
+      </li>
+      <li>
+        {{moment(request.end).tz("Europe/Berlin").format('DD/MM/YYYY')}}
+
+      </li>
+    </ul>
+    <button mat-raised-button type="button" color="primary" (click)="selectAllCombinationList(true)" class="mr-20">
+      Select All </button>
+      <button mat-raised-button type="button" color="primary" (click)="selectAllCombinationList(false)" class="mr-20">
+        Unselect All </button>
+    <button mat-raised-button type="button" color="primary" (click)="showMatrixTable = !showMatrixTable" class="mr-20">
+      back </button>
+    <button mat-raised-button type="button" color="accent" (click)="createPricingObject()"> Create
+
+      <ng-container *ngIf="isLoading ">
+        {{numberOfSuccesRequests}} / {{numberOfCombinationsSelected()}}
+          <svg xmlns="http://www.w3.org/2000/svg" 
+                xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; " width="50px" height="50px"
+                viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+                <g transform="rotate(0 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.9166666666666666s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(30 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.8333333333333334s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(60 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.75s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(90 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.6666666666666666s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(120 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.5833333333333334s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(150 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.5s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(180 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.4166666666666667s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(210 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.3333333333333333s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(240 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.25s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(270 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.16666666666666666s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(300 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.08333333333333333s"
+                      repeatCount="indefinite"></animate>
+                  </rect>
+                </g>
+                <g transform="rotate(330 50 50)">
+                  <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                    <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="0s" repeatCount="indefinite">
+                    </animate>
+                  </rect>
+                </g>
+              </svg> 
+      </ng-container>  
+    </button>
+  </div>
+
+</div>

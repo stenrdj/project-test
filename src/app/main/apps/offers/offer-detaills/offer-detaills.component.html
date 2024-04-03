@@ -1,0 +1,158 @@
+<div id="tenders-offers" class="page-layout carded fullwidth inner-scroll">
+
+    <!-- TOP BACKGROUND -->
+    <div class="top-bg accent"></div>
+    <!-- / TOP BACKGROUND -->
+
+    <!-- CENTER -->
+    <div class="center">
+
+        <!-- HEADER -->
+        <div class="header accent" fxLayout="column" fxLayoutAlign="center center" fxLayout.gt-xs="row"
+            fxLayoutAlign.gt-xs="space-between center">
+
+            <!-- APP TITLE -->
+            <div class="logo mb-24 mb-sm-0" fxLayout="row" fxLayoutAlign="start center">
+                <mat-icon class="logo-icon s-32 mr-16" [@animate]="{value:'*',params:{delay:'50ms',scale:'0.2'}}">
+                    receipt
+                </mat-icon>
+                <span class="logo-text h1" [@animate]="{value:'*',params:{delay:'100ms',x:'-25px'}}">{{tender.name}} Offers</span>
+            </div>
+            <!-- / APP TITLE -->
+
+
+
+        </div>
+        <!-- / HEADER -->
+
+        <!-- CONTENT CARD -->
+        <div class="content-card">
+            <div class="content">
+                <mat-accordion>
+                    <mat-expansion-panel hideToggle *ngFor="let offer of tender.offers;let index=index;">
+                      <mat-expansion-panel-header>
+                        <mat-panel-title>
+                         Offer N° {{index +1 }} 
+                        </mat-panel-title>
+                        <mat-panel-description>
+                            Creation Date : {{moment(offer.creation_date).tz("Europe/Berlin").format('DD/MM/YYYY')}} - 
+                            Deadline Date : {{moment(offer.creation_date).add().tz("Europe/Berlin").add(1, "months").format('DD/MM/YYYY')}} 
+                         </mat-panel-description>
+                      </mat-expansion-panel-header>
+                      <div fxLayout="row" fxLayoutAlign="end end"   class="  pb-24"  >
+                        <button mat-raised-button color="primary"   (click)="routeToOriginalPrices(tender.id,offer.pricings)">Original Prices</button>
+                         <button mat-raised-button color="primary"  style="background: red !important; margin-left: 1em;" (click)="deleteOffer(offer.id)">Delete Offer</button>
+ 
+
+                     </div>
+
+                       <table class="simple centred scroll-width" style="position: relative;"    *ngIf="!offer?.is_type_classic">
+                        <thead style="position: absolute; background: #fff; left: 0px; top: 0px; z-index: 999; width: 100%;">
+                            <tr style="width: 100%; display: inline-flex; ">
+                                <ng-container  *ngFor="let colName of  getAttributesForPricingTable(offer.pricings) ">
+                                    <th  [style.width]=" (100/( getAttributesForPricingTable(offer.pricings).length - 2 ))+'%'  ">
+                                        {{colName}}   
+                                    </th>
+                                </ng-container>
+                              
+                            </tr>
+                        </thead>
+                        <tbody style="max-height: 500px; overflow: scroll; display:block;padding-top: 3.4em;width:100%;">
+                            <div class="table-row"   *ngFor="let price of offer.pricings "  >
+                                    <tr class="row-data"  *ngFor="let result of price.results; let last = last;">
+                                        <ng-container *ngFor="let colsName of getAttributesForPricingTable(offer.pricings) ; let index=index;">
+                                             <td  [style.width]=" (100/(getAttributesForPricingTable(offer.pricings).length - 2 ))+'%'  "
+                                            >  
+                                                <ng-container *ngFor="let priceResult of  result; let pIndex=index; ">
+                                                    
+                                                    <span *ngIf="!!priceResult?.date && colsName == 'date' "> 
+                                                        {{ moment(priceResult[colsName]).tz("Europe/Berlin").format('DD/MM/YYYY') }}
+
+                                                    </span>
+                                                    <span *ngIf="colsName != 'date' ">
+                                                       
+                                                        <ng-container >
+                                                            
+                                                            {{priceResult[colsName]}}                                                                                    
+                                                        </ng-container>
+                                                    
+                                                    </span>
+                                                    
+                                                    
+                                                </ng-container>
+                                            
+                                            </td>
+                                        
+                                         </ng-container>
+        
+                                    </tr>
+                                    <div fxLayout="row" fxLayoutAlign="center center"   class="pb-8"  >
+                                        <button mat-stroked-button *ngFor="let site of price.sites" class="table-tag color-blue" >Site:{{site}} </button>
+                                        <button mat-stroked-button class="table-tag color-green" >PricingType:{{price.type}} </button>
+                                        <button mat-stroked-button class="table-tag color-yellow" >{{price.capacity | kwToMw }}</button>
+                                        <button mat-stroked-button class="table-tag red-900-border border " >{{moment(price.start_date).tz("Europe/Berlin").format('DD/MM/YYYY')}} - {{getPriceDateDifference(price.start_date,price.end_date)}} - {{moment(price.end_date).tz("Europe/Berlin").subtract(1, "days").format('DD/MM/YYYY')}}  </button>
+
+</div>
+                                </div>
+                        </tbody>
+                        
+                    </table>
+                    <table class="simple centred scroll-width" style="position: relative;" *ngIf="offer?.is_type_classic"  >
+                        <thead style="position: absolute; background: #fff; left: 0px; top: 0px; z-index: 999; width: 100%;">
+                            <tr style="width: 100%; display: inline-flex; ">
+                                <th   [style.width]=" (100/5)+'%'  ">
+                                   Site name
+                               </th>
+                               <th   [style.width]=" (100/5)+'%'  ">
+                                  capacity
+                              </th>
+                              <th   [style.width]=" (100/5)+'%'  ">
+                                 start  
+                             </th>
+                             <th   [style.width]=" (100/5)+'%'  ">
+                                end
+                            </th>
+                            <th   [style.width]=" (100/5)+'%'  ">
+                               Price   
+                           </th>
+                               
+                            </tr>
+                        </thead>
+                        <tbody style="max-height: 500px; overflow: scroll; display:block;padding-top: 3.4em;width:100%;">
+                            <div class="table-row"   *ngFor="let price of offer.pricings  "  >
+                                    <tr class="row-data"  *ngFor="let result of price.results; let last = last;">
+
+                                            <td   [style.width]=" (100/5)+'%'  " >  
+                                                {{getPriceSitesAsString(price.sites)}}
+                                            </td>  
+                                            <td   [style.width]=" (100/5)+'%'  " >  
+                                                {{price.capacity | kwToMw }}
+                                            </td>  
+                                            <td   [style.width]=" (100/5)+'%'  " >  
+                                                {{moment(price.end_date).tz("Europe/Berlin").format('DD/MM/YYYY')}}
+                                            </td>  
+                                            <td   [style.width]=" (100/5)+'%'  " >  
+                                                {{moment(price.end_date).tz("Europe/Berlin").add(1, "days").format('DD/MM/YYYY')}}
+                                            </td>  
+                                            <td   [style.width]=" (100/5)+'%'  " >  
+                                                {{getPriceCalculated(result)}}
+                                            </td>  
+        
+                                    </tr>
+                                    
+                                
+                                </div>
+                        </tbody>
+                    </table>
+                    
+                    </mat-expansion-panel> 
+                  </mat-accordion>
+ 
+            </div>
+
+
+        </div>
+        <!-- / CONTENT CARD -->
+    </div>
+    <!-- / CENTER -->
+</div>

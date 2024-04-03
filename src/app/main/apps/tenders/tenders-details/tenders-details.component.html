@@ -1,0 +1,645 @@
+<div id="order" class="page-layout carded fullwidth inner-scroll">
+
+    <!-- TOP BACKGROUND -->
+    <div class="top-bg accent"></div>
+    <!-- / TOP BACKGROUND -->
+
+    <!-- CENTER -->
+    <div class="center">
+
+        <!-- HEADER -->
+        <div class="header accent" fxLayout="row" fxLayoutAlign="space-between center">
+
+            <!-- APP TITLE -->
+            <div fxLayout="row" fxLayoutAlign="start center">
+
+                <button mat-icon-button class="mr-16" [routerLink]="'/apps/tenders'">
+                    <mat-icon>arrow_back</mat-icon>
+
+                </button>
+
+                <div fxLayout="column" fxLayoutAlign="start start"
+                    [@animate]="{value:'*',params:{delay:'100ms',x:'-25px'}}">
+                    <div class="h2">{{tender.name}}  
+                    </div>
+                </div>
+            </div>
+            <div fxLayout="row" fxLayoutAlign="end end" class="m-40">
+                <mat-spinner class="mr-16" color="accent" *ngIf="isTenderStillLoading" diameter="30"></mat-spinner>
+                 <a mat-raised-button color="accent"  target="_blank" class="ml-16"   (click)="_tenderService.transferToGeco(tender.id)" >Transfer to GECO</a>
+                <a mat-raised-button color="primary"  target="_blank" class="ml-16"   (click)="_tenderService.downloadAssetsFile(tender.id)" >Download Assets</a>
+                <a mat-raised-button color="primary"  class="ml-16"   (click)="openTimeSeriesDialog()">Timeseries</a>
+          
+                <button mat-icon-button mat-raised-button [matMenuTriggerFor]="menu" color="primary" class="ml-16" >
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #menu="matMenu">
+                    <button mat-menu-item [routerLink]="'/apps/tenders/'+tender.id+'/edit'" >
+                       <span>Edit Tender</span>
+                    </button> 
+                    <button mat-menu-item color="warn" (click)="removeTenderDialog()">
+                       <span style="color:red">DELETE</span>
+                    </button>
+                  </mat-menu>
+            </div>
+            <!-- / APP TITLE -->
+
+        </div>
+        <!-- / HEADER -->
+
+        <!-- CONTENT CARD -->
+        <div class="content-card">
+
+            <!-- CONTENT -->
+            <div class="content">
+
+                <mat-tab-group fxLayout="column" fxFlex class="mat-tab-group-container" [selectedIndex]="selectedTab.value" (selectedIndexChange)="selectedTabIndexChange($event)">
+
+                    <mat-tab label="Tender Details">
+
+                        <div class="order-details tab-content p-24" fusePerfectScrollbar>
+
+                            <div class="section pb-48">
+
+                                <div class="pb-16" fxLayout="row" fxLayoutAlign="start center">
+                                    <mat-icon class="m-0 mr-16 secondary-text">account_circle</mat-icon>
+                                    <div class="h2 secondary-text">Client</div>
+                                </div>
+
+                                <div class="customer mb-32">
+                                    <table class="simple">
+                                        <thead>
+                                            <tr>
+                                                <th>Name</th>
+                                                <th>Country</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <div fxLayout="row" fxLayoutAlign="start center">
+                                                        <span class="name text-truncate">{{ tender.counterpart }}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <span class="email text-truncate">{{ tender.country }}</span>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+
+                            <div class="section pb-48" *ngIf="tender?.deadline">
+
+                                <div class="pb-16" fxLayout="row" fxLayoutAlign="start center">
+                                    <mat-icon class="m-0 mr-16 secondary-text">access_time</mat-icon>
+                                    <div class="h2 secondary-text">Tender Status</div>
+                                </div>
+
+                                <table class="simple">
+                                    <thead>
+                                        <tr>
+                                            <th>Status</th>
+                                            <th>Deadline</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        <tr>
+                                            <td>
+                                                <span class="status h6 p-4 green-500"
+                                                    *ngIf="moment(tender.deadline).diff(moment(), 'days') > 0">
+                                                    Pending
+                                                </span>
+                                                <span class="status h6 p-4 red-900"
+                                                    *ngIf="moment(tender.deadline).diff(moment(), 'days') < 1">
+                                                    Expired
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span>
+                                                    {{ moment(tender.deadline).tz("Europe/Berlin").format('DD/MM/YYYY')}}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+
+                            </div>
+                            
+
+
+                        </div>
+                    </mat-tab>
+
+                    <mat-tab label="Tasks / Pricings" >
+
+                        <div class="order-details tab-content p-24" fusePerfectScrollbar>
+
+                            <div class="section pb-48">
+
+                                <div fxLayout="row" fxLayoutAlign="space-between" class="m-8">
+                                    <div class="pb-16" fxLayout="row" fxLayoutAlign="start center">
+                                        <mat-icon class="m-0 mr-16 secondary-text">check_circle</mat-icon>
+                                        <div class="h2 secondary-text">Tender Tasks </div>
+                                    </div>
+                                    <button mat-raised-button color="primary" (click)="openAddPricingDialog()">Add
+                                        Pricing task</button>
+
+                                </div>
+
+
+                                <table class="simple" >
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody *ngIf="tender?.tasksLoaded">
+
+                                        <tr *ngFor="let task of tender?.tasks">
+
+                                            <td>
+                                                <span>
+                                                    {{ task.name}}
+                                                </span>
+                                            </td>
+                                            <td>
+
+                                                <span class="status h6 p-4  "
+                                                [class.blue-500]="task.status === 'pending'"
+                                                    [class.green-500]="task.status === 'success'"
+                                                     [class.yellow-900]="task.status === 'computing'"
+                                                    [class.grey-900]="task.status === 'skipped'"
+                                                    [class.red-900]="task.status === 'failed'">
+                                                    {{task.status}}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tbody *ngIf="!tender?.tasksLoaded">
+
+                                        <tr  >
+
+                                            <td colspan="2" style="text-align:center">
+                                                <span>
+                                                    Empty
+                                                </span>
+                                            </td>
+                                             
+                                        </tr>
+                                    </tbody>
+                                    
+                                </table>
+
+
+                            </div>
+                            <div class="section pb-48">
+
+                                <div fxLayout="row" fxLayoutAlign="space-between" class="m-8">
+                                    <div class="pb-16" fxLayout="row" fxLayoutAlign="start center">
+                                        <mat-icon class="m-0 mr-16 secondary-text">monetization_on</mat-icon>
+                                        <div class="h2 secondary-text">Pricing Objects </div>
+                                    </div>
+                                    <button mat-raised-button color="primary" (click)="openAddPricingObject()">Pricing Request</button>
+
+                                </div>
+
+
+                                <table class="simple" >
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Start Date</th>
+                                            <th>End Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody *ngIf=" tender?.pricingLoaded">
+
+                                        <tr *ngFor="let price of tender?.pricings">
+
+                                            <td>
+                                                <span (click)="filterTableByPriceName(1,price.name)" class="price-name">
+                                                    {{price.name}}
+                                                </span>
+                                            </td>
+
+                                            <td>
+                                                <span>
+                                                  {{ moment(price.start_date).tz("Europe/Berlin").format('DD/MM/YYYY')}}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span>
+                                                    {{ moment(price.end_date).tz("Europe/Berlin").format('DD/MM/YYYY')}}
+                                                </span>
+                                            </td>
+                                            
+                                        </tr>
+                                    </tbody>
+                                    <tbody *ngIf=" !tender?.pricingLoaded">
+
+                                        <tr >
+
+                                            <td colspan="3" style="text-align:center">
+                                                <span>
+                                                    Empty
+                                                </span>
+                                            </td>
+
+                                            
+                                            
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+
+                            </div>
+
+                         </div>
+                    </mat-tab> 
+                    <!-- Start Trader Result-->
+                     <mat-tab label="Pricing History"  *ngIf=" tender?.pricings?.length ">
+ 
+                        <div class="products tab-content p-24" fusePerfectScrollbar>
+
+
+                            <div class="section pb-48">
+                                <div fxLayout="row" fxLayoutAlign="space-between" class="m-8">
+                                    <div class="pb-16" fxLayout="row" fxLayoutAlign="start center">
+                                        <mat-icon class="m-0 mr-16 secondary-text">euro_symbol</mat-icon>
+                                        <div class="h2 secondary-text">Pricing List </div>
+                                    </div> 
+
+                                </div>
+                                <mat-form-field class="example-chip-list" appearance="outline">
+                                    <mat-label>Table filters</mat-label>
+                                    <mat-chip-list #chipList aria-label="Table filters">
+                                        <mat-chip *ngFor="let filter of selectedFilters" [selectable]="true"
+                                            [removable]="true" (removed)="remove(filter)" [class.chip-blue]="filter.indexOf('Site') > -1"  [class.chip-green]="filter.indexOf('PricingType') > -1">
+                                            {{filter}}
+                                            <mat-icon matChipRemove  >cancel</mat-icon>
+                                        </mat-chip>
+                                        <input placeholder="New filter..." #filterInput [formControl]="filterForm"
+                                            [matAutocomplete]="auto" [matChipInputFor]="chipList"
+                                            [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                                            (matChipInputTokenEnd)="add($event)" *ngIf="selectedFilters.length <  filtersList.length ">
+                                    </mat-chip-list>
+ 
+                                    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)" >
+                                       <ng-container *ngFor="let filter of filtersList" >
+
+                                            <mat-option  [value]="filter" *ngIf="!selectedFilters.includes(filter)" >
+                                                {{filter}}
+                                            </mat-option>
+                                       </ng-container>
+                                       
+                                    </mat-autocomplete>
+                                    
+                                 </mat-form-field>
+                                
+                                     
+                                  <!-- /*** Pricing Table  ***/-->
+                                 <table class="simple centred scroll-width" style="position: relative;" *ngIf=" filtredTender.pricings ">
+                                    <thead style="position: absolute; background: #fff; left: 0px; top: 0px; z-index: 999; width: 100%;">
+                                        <tr style="width: 100%; display: inline-flex; ">
+                                            <th style="width:20px">
+                                                <mat-checkbox 
+                                                    class="example-margin"
+                                                    (change)="setAllPricesAsChecked($event)"
+                                                    [checked]="isAllPricesChecked()">
+                                                </mat-checkbox>
+                                                        
+                                                         
+                                            </th>
+                                            <ng-container *ngFor="let colsName of  pricingDescriptionAttr " >
+                                                <th [style.width]=" (100/(pricingDescriptionAttr.length -1 ))+'%'  "  >
+                                                    {{colsName}}   </th>
+                                            </ng-container>
+                                            
+                                         </tr>
+                                    </thead>
+                                    <tbody style="max-height: 500px; overflow: scroll; display:block;padding-top: 3.4em;width:100%;">
+                                        <div *ngFor="let price of filtredTender.pricings  " [style.background]="getRandomColor(price.id)">
+                                             
+                                                 <ng-container  *ngFor="let result of price.results; let last = last;">
+                                                    <tr class="row-data"  [style.background]=" getRandomColor(price.id)" (mouseenter)="displayedCheckboxId = getPriceIdFromPricingResults(result)" (mouseleave)="displayedCheckboxId = null">
+                                                        <td style="width:20px;padding-top: 10px;" >
+
+                                                            <mat-checkbox 
+                                                                 *ngIf="(displayedCheckboxId == getPriceIdFromPricingResults(result) && isCurrentUserTrader) || (!!checkedCheckboxes[getPriceIdFromPricingResults(result)] && isCurrentUserTrader) || (isPriceResultApproved(result) && isCurrentUserTrader)"
+ 
+                                                                class="example-margin" 
+                                                                [(ngModel)]="checkedCheckboxes[getPriceIdFromPricingResults(result)]"></mat-checkbox>
+                                                        
+                                                            </td>
+                                                  
+                                                         
+
+                                                        <ng-container *ngFor="let colsName of pricingDescriptionAttr ; let index = index;" >
+                                                            <td 
+                                                            [style.width]=" (100/( pricingDescriptionAttr.length - 1))+'%'  " >
+                                                                
+                                                                
+                                                                <ng-container *ngFor="let price of  result   ">
+                                                                    <span *ngIf="!!price?.date && colsName == 'date' "> 
+                                                                        {{ moment(price[colsName]).tz("Europe/Berlin").format('DD/MM/YYYY') }}
+    
+                                                                    </span>
+                                                                    <span *ngIf="colsName != 'date'  && !!price[colsName]">
+ 
+                                                                        <ng-container *ngIf="isCurrentUserTrader">
+                                                                            <input value="{{price[colsName]}}"  (change)="updateEditPricingTable(colsName , getPriceIdFromPricingResults(result),$event)"/>  
+
+                                                                        </ng-container>
+                                                                        <ng-container *ngIf="isCurrentUserOriginator">
+                                                                            {{price[colsName]}}
+                                                                        </ng-container>
+                                                                    
+ 
+                                                                    </span>
+                                                                    
+                                                                </ng-container>
+                                                                    <br/>
+                                                            </td>
+                                                        </ng-container>
+                                                        
+                                                    </tr>
+                                                </ng-container>
+                                                <tr class="row-tags" *ngIf="price.results?.length"  >
+                                                    <td [colSpan]=" objectKeys(pricingDescriptionAttr).length + 1 ">
+                                                        <button mat-stroked-button class="table-tag blue-900-border border " > {{price.name}}  </button>
+                                                        <button mat-stroked-button class="table-tag yellow-900-border border " *ngIf="price.capacity" > {{price.capacity | kwToMw }}  </button>
+                                                        <button mat-stroked-button class="table-tag  purple-900-border border" (click)="add(price.id)" >Price ID:{{price.id}} </button>
+                                                        <button mat-stroked-button *ngFor="let site of price.sites" class="table-tag color-blue" (click)="add('Site:'+site)">Site:{{site}} </button>
+                                                        <button mat-stroked-button class="table-tag color-green" (click)="add('PricingType:'+price.type)">PricingType:{{price.type}} </button>
+                                                        <button mat-stroked-button class="table-tag red-900-border border " >{{moment(price.start_date).tz("Europe/Berlin").format('DD/MM/YYYY')}} - {{getPriceDateDifference(price.start_date,price.end_date)}} - {{moment(price.end_date).tz("Europe/Berlin").format('DD/MM/YYYY')}}  </button>
+
+                                                    </td>
+                                                        
+                                                </tr>
+                                                <tr class="row-tags" *ngIf="price.results?.length"  >
+                                                                        <td [colSpan]=" objectKeys(pricingDescriptionAttr).length + 1 ">
+                                                                            <button mat-stroked-button class="table-tag grey-900-border border "  > {{price.name}}  </button>
+                                                                          
+                                                                        </td>
+                                                                            
+                                                                    </tr>
+                                                 
+                                            
+                                            </div>
+                                    </tbody>
+                                </table>
+                                <!-- /*** End of Pricing Table  ***/-->
+                                <div class="table-ctas" *ngIf="isCurrentUserTrader">
+                                     
+                                    <button mat-raised-button color="accent" 
+                                            class="mr-20" 
+                                            [disabled]="!isAtLeastOneCheckboxChecked()" 
+                                            (click)="approvePriceByTrader()"
+                                            >
+                                                <mat-icon  >check_circle_outline</mat-icon>
+                                                Approve 
+                                    </button>
+                                </div>
+                                
+
+                            </div>
+
+                        </div>
+                    </mat-tab>
+                    <!-- End Trader Resault-->
+                    <!-- Start Originators Results-->
+                     <mat-tab label="Approved Prices"  *ngIf=" tender?.pricings?.length">
+ 
+                        <div class="products tab-content p-24" fusePerfectScrollbar>
+
+
+                            <div class="section pb-48">
+                                <div fxLayout="row" fxLayoutAlign="space-between" class="m-8">
+                                    <div class="pb-16" fxLayout="row" fxLayoutAlign="start center">
+                                        <mat-icon class="m-0 mr-16 secondary-text">euro_symbol</mat-icon>
+                                        <div class="h2 secondary-text">Pricing List </div>
+                                    </div> 
+
+                                </div>
+                                <mat-form-field class="example-chip-list" appearance="outline">
+                                    <mat-label>Table filters</mat-label>
+                                    <mat-chip-list #chipList aria-label="Table filters">
+                                        <mat-chip *ngFor="let filter of selectedFilters" [selectable]="true"
+                                            [removable]="true" (removed)="remove(filter)" [class.chip-blue]="filter.indexOf('Site') > -1"  [class.chip-green]="filter.indexOf('PricingType') > -1">
+                                            {{filter}}
+                                            <mat-icon matChipRemove  >cancel</mat-icon>
+                                        </mat-chip>
+                                        <input placeholder="New filter..." #filterInput [formControl]="filterForm"
+                                            [matAutocomplete]="auto" [matChipInputFor]="chipList"
+                                            [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                                            (matChipInputTokenEnd)="add($event)" *ngIf="selectedFilters.length <  filtersList.length ">
+                                    </mat-chip-list>
+ 
+                                    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)" >
+                                       <ng-container *ngFor="let filter of filtersList" >
+
+                                            <mat-option  [value]="filter" *ngIf="!selectedFilters.includes(filter)" >
+                                                {{filter}}
+                                            </mat-option>
+                                       </ng-container>
+                                       
+                                    </mat-autocomplete>
+                                    
+                                 </mat-form-field>
+
+                                 <!-- /*** Pricing Table  ***/-->
+                                 <table class="simple centred scroll-width" style="position: relative;" *ngIf=" filtredTender.pricings ">
+                                    <thead style="position: absolute; background: #fff; left: 0px; top: 0px; z-index: 999; width: 100%;">
+                                        <tr style="width: 100%; display: inline-flex; ">
+                                            <th style="width:20px">
+                                                <mat-checkbox 
+                                                class="example-margin"
+                                                (change)="setAllPricesAsChecked($event)"
+                                                [checked]="isAllPricesChecked()">
+                                            </mat-checkbox>
+                                            </th>
+                                            <th *ngFor="let colsName of  pricingDescriptionAttr " [style.width]=" (100/(pricingDescriptionAttr.length))+'%'  ">
+                                                {{colsName}}   </th>
+                                         </tr>
+                                    </thead>
+                                
+                                    <tbody style="max-height: 500px; overflow: scroll; display:block;padding-top: 3.4em;width:100%;"  >
+                                        <div *ngFor="let price of filtredTender.pricings" class="table-row">
+                                            <ng-container  *ngFor="let result of price.results; let last = last;">
+
+                                                <tr class="row-data" 
+                                                    (mouseenter)="displayedCheckboxId = getPriceIdFromPricingResults(result)" 
+                                                    (mouseleave)="displayedCheckboxId = null"
+                                                    *ngIf="isPriceResultApproved(result)"
+                                                    >
+                                                    
+                                                    <td style="width:20px;padding-top: 10px;" >
+                                                        <mat-checkbox 
+                                                            *ngIf="(displayedCheckboxId == getPriceIdFromPricingResults(result) && isCurrentUserOriginator) || (!!checkedCheckboxes[getPriceIdFromPricingResults(result)] && isCurrentUserOriginator )"
+                                                            class="example-margin" 
+                                                            [(ngModel)]="checkedCheckboxes[getPriceIdFromPricingResults(result)]"></mat-checkbox>
+                                                    </td>
+                                                    <td *ngFor="let colsName of pricingDescriptionAttr; let index = index; "
+                                                        (mouseenter)=" (colsName == 'BETA' || colsName == 'INDIC' ) && displayedPricingIcon = getPriceIdFromPricingResults(result)+'/'+colsName"
+                                                        (mouseleave)="displayedPricingIcon = null"
+                                                        [style.width]=" (100/( pricingDescriptionAttr.length))+'%'  "
+                                                        >
+                                                        <ng-container *ngFor="let priceResult of  result ">
+                                                             
+                                                                    <span *ngIf="!!priceResult?.date && colsName == 'date' "> 
+                                                                        {{ moment(priceResult[colsName]).tz("Europe/Berlin").format('DD/MM/YYYY') }}
+    
+                                                                    </span>
+                                                                    <span *ngIf="colsName != 'date'  ">
+                                                                        {{priceResult[colsName]}}
+                                                                      
+                                                                    </span>
+                                                                  
+                                                        </ng-container>
+ 
+                                                        
+                                                       
+
+                                                        
+                                                        
+                                                    </td>
+                                                  
+                                                </tr>
+                                                <tr class="row-tags" *ngIf="isPriceResultApproved(result)">
+                                                    <td [colSpan]=" objectKeys(pricingDescriptionAttr).length  ">
+                                                        <button mat-stroked-button class="table-tag blue-900-border border " > {{price.name}}  </button>
+                                                        <button mat-stroked-button class="table-tag yellow-900-border border " *ngIf="price.capacity" > {{price.capacity | kwToMw }} </button>
+                                                        <button mat-stroked-button *ngFor="let site of price.sites" class="table-tag color-blue" (click)="add('Site:'+site)">Site:{{site}} </button>
+                                                        <button mat-stroked-button class="table-tag color-green" (click)="add('PricingType:'+price.type)">PricingType:{{price.type}} </button>
+                                                        <button mat-stroked-button class="table-tag red-900-border border " >{{moment(price.start_date).tz("Europe/Berlin").format('DD/MM/YYYY')}} - {{getPriceDateDifference(price.start_date,price.end_date)}} - {{moment(price.end_date).tz("Europe/Berlin").format('DD/MM/YYYY')}}  </button>
+                                                     </td>
+                                                        
+                                                </tr>
+                                            </ng-container> 
+                                                
+                                            
+                                        </div>
+                                    </tbody>
+                                </table>
+                                <!-- /*** End of Pricing Table  ***/-->
+                                <div class="table-ctas" *ngIf="isCurrentUserOriginator">
+                                    <button mat-raised-button color="primary" 
+                                            class="mr-20" 
+                                            [disabled]="!isAtLeastOneCheckboxChecked()" 
+                                            (click)="redirectToCreatOffersPage()"
+                                            >
+                                                <mat-icon  >receipt</mat-icon>
+                                                Add to Offer 
+                                    </button>
+                                   
+                                </div>
+                                
+
+                            </div>
+
+                        </div>
+                    </mat-tab>
+                    <!-- Ends Originators Results-->
+                    <mat-tab label="Assets" *ngIf=" tender?.assetsLoaded && tender?.assets?.length ">
+                        <div class="products tab-content p-24" fusePerfectScrollbar>
+
+                            <div class="section pb-48">
+
+                                <div class="pb-16" fxLayout="row" fxLayoutAlign="start center">
+                                    <mat-icon class="m-0 mr-16 secondary-text">toys</mat-icon>
+                                    <div class="h2 secondary-text">Assets</div>
+                                </div>
+                                <google-map width="100%" [center]="{ lat: tender?.assets[0]?.lat, lng: tender?.assets[0]?.lon }" [zoom]="15">
+                                    <map-marker *ngFor="let assetMarker of tender?.assets;let i = index;"
+                                    [position]="{ lat: assetMarker?.lat || 0, lng: assetMarker?.lon || 0 }" 
+                                    [icon]="assetMarker?.active ? '/assets/icons/map/marker-icon-active.png' : '/assets/icons/map/marker-icon.png'"
+                                    (mapMouseover)="changeAssetMarkerIcon(i)" 
+                                    (mapMouseout)="changeAssetMarkerIcon()"  
+                                    (mapClick)="focusSelectedAsset(i)"></map-marker>
+                                </google-map>
+
+                                <table class="simple centred assets pt-48">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Capacity</th>
+                                            <th>Machine</th>
+                                            <th *ngFor="let item of assetsDescriptionAttr?.description | keyvalue ">
+                                                {{item.key}}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let asset of tender.assets; let i=index;  " id="asset-{{i}}" [class.active-asset]="asset.active">
+                                            <td>
+                                                {{ asset.name}}  
+                                            </td>
+                                            <td>
+                                                {{ asset.installed_capacity}}
+                                            </td>
+                                            <td>
+                                                {{ asset.type}}
+                                            </td>
+
+                                            <td *ngFor="let item of  asset?.description | keyvalue">
+                                                {{item.value}}
+                                            </td>
+                                             <ng-container *ngIf="assetsDescriptionAttr?.description && asset?.description">
+                                                    <td
+                                                    *ngFor="let e of [].constructor( objectKeys(assetsDescriptionAttr.description).length - objectKeys(asset.description).length )">
+                                                        -
+                                                    </td>
+                                            </ng-container>
+                                            
+
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                            </div>
+                           
+
+                        </div>
+                    </mat-tab>
+                    <!-- Ends Originators Results-->
+                    <mat-tab label="Comments" *ngIf="!!tender?.comments?.length" >
+                        <div class="comments tab-content p-24" fusePerfectScrollbar>
+                            <div class="timeline">
+                                <ul>
+                                  <li *ngFor="let comment of tender.comments"> 
+                                    <div class="right_content" [class.event-comment]="isEventComment(comment.text)">
+                                      <h2> {{tender.users | getById:comment.author_id:'name'}}</h2>
+                                      <p>{{formatComment(comment,tender.users | getById:comment.author_id:'name')}}
+                                      </p>
+                                    </div>
+                                    <div class="left_content">
+                                      <h3>{{moment(comment.creation_date).fromNow()}} </h3>
+                                    </div>
+                                  </li> 
+                                   <div style="clear:both;"></div>
+                                </ul>
+                              </div>
+
+                        </div>
+                    </mat-tab>
+
+
+
+
+                </mat-tab-group>
+
+            </div>
+            <!-- / CONTENT -->
+
+        </div>
+        <!-- / CONTENT CARD -->
+
+    </div>
+    <!-- / CENTER -->
+</div>

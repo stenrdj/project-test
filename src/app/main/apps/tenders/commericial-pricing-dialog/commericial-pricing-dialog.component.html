@@ -1,0 +1,32 @@
+<ng-container *ngIf="!data.content">
+    <h1 mat-dialog-title>Add Commercial Margin</h1>
+    <div mat-dialog-content>
+        <form [formGroup]="commercialPricingForm">
+
+            <mat-form-field appearance="outline"   >
+                <mat-label>Price</mat-label>
+                <input matInput type="text"  formControlName="price" >
+            </mat-form-field>
+            
+            
+            <mat-form-field appearance="outline"   >
+                <mat-label>Comment</mat-label>
+                <textarea matInput   formControlName="comment" ></textarea>
+            </mat-form-field>
+        
+        <button   mat-raised-button  type="button" color="primary" [disabled]="!commercialPricingForm.valid" (click)="submitCommercialPrice()" > Add </button> 
+    </form>
+        
+    
+    </div>
+</ng-container>
+<ng-container *ngIf="!!data.content">
+    <h1 mat-dialog-title>Commercial Margin for <strong> {{data.content.pricing_code}} </strong></h1>
+    <mat-list role="list">
+        <mat-list-item role="listitem"><strong>Price :</strong></mat-list-item>
+        <mat-list-item role="listitem"> {{data.content.price}}</mat-list-item>
+        <mat-list-item role="listitem"><strong>Comment :</strong></mat-list-item>
+        <mat-list-item role="listitem">  {{data.content.comment}}</mat-list-item>
+      </mat-list>
+   
+</ng-container>

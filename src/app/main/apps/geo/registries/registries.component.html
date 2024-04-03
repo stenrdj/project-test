@@ -1,0 +1,121 @@
+<div
+	id="goo-registries" class="page-layout carded fullwidth inner-scroll">
+
+	<!-- TOP BACKGROUND -->
+	<div class="top-bg accent"></div>
+	<!-- / TOP BACKGROUND -->
+
+	<!-- CENTER -->
+	<div
+		class="center">
+
+		<!-- HEADER -->
+		<div
+			class="header accent" fxlayout="column" fxlayoutalign="center center" fxlayout.gt-xs="row" fxlayoutalign.gt-xs="space-between center" style="display: flex; align-items: center; justify-content: space-between;">
+
+			<!-- APP TITLE -->
+			<div class="logo mb-24 mb-sm-0" fxlayout="row" fxlayoutalign="start center">
+				<mat-icon class="logo-icon s-32 mr-16" [@animate]="{value:'*',params:{delay:'50ms',scale:'0.2'}}">
+					receipt
+				</mat-icon>
+				<span class="logo-text h1" [@animate]="{value:'*',params:{delay:'100ms',x:'-25px'}}">Registry files</span>
+			</div>
+			<!-- / APP TITLE -->
+			<div fxlayout="row" fxlayoutalign="end end" class="m-40">
+
+				<a mat-raised-button color="primary" target="_blank" class="ml-16" (click)="openUploadRegistryModal()">Upload Registry</a>
+
+			</div>
+
+		</div>
+		<div class="content-card">
+			<div class="content" style="display: flex;flex-direction: column;padding: 15px;">
+        <!-- Showing status of uploaded file -->
+          <div class="registry-file-status" *ngIf="!!uploadedFileStatus" >
+            <div class="registry-file-container" [class.success]="!!uploadedFileStatus?.results?.success?.length"  [class.errors]="!!uploadedFileStatus?.results?.errors?.length"> 
+                    <div class="registry-file_icon">
+                          <mat-icon *ngIf="!!uploadedFileStatus?.results?.success?.length" >check_circle</mat-icon>
+                          <mat-icon *ngIf="!!uploadedFileStatus?.results?.errors?.length" >sync_problem</mat-icon>
+                      </div>
+                      <div class="registry-file_title">
+                           {{uploadedFileStatus?.file?.name}}
+                      </div>
+                      <div class="registry-file_action" >
+                          <span *ngIf="!!uploadedFileStatus?.results?.errors?.length" (click)="showFileErrors=!showFileErrors">Show/Hide Errors</span>
+                          <span *ngIf="!!uploadedFileStatus?.results?.success?.length" (click)="uploadedFileStatus=[]">Close</span>
+                      </div>
+              </div>
+              <div *ngIf="!!uploadedFileStatus?.results?.errors?.length" [hidden]="!showFileErrors">
+                <div class="error-row" *ngFor="let row of uploadedFileStatus?.results?.errors" >
+                    <span class="error-row_number">Line {{row?.Row}}</span>
+                    <span class="error-row_message">{{row?.Error}}</span>
+                </div>
+              </div>
+
+          </div>
+                   <!-- End Showing status of uploaded file -->
+                <mat-form-field appearance="standard">
+                    <mat-label>Search</mat-label>
+                    <input matInput (keyup)="applyFilter($event)" placeholder="Ex. ium" #input>
+                  </mat-form-field>
+                  
+                  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+                  
+                    <!-- Position Column -->
+                    <ng-container matColumnDef="price">
+                      <th mat-header-cell *matHeaderCellDef> Price </th>
+                      <td mat-cell *matCellDef="let element"> {{element.price}} </td>
+                    </ng-container>
+                  
+                    <!-- Name Column -->
+                    <ng-container matColumnDef="volume">
+                      <th mat-header-cell *matHeaderCellDef> Volume </th>
+                      <td mat-cell *matCellDef="let element"> {{element.volume}} </td>
+                    </ng-container>
+                  
+                    <!-- Weight Column -->
+                    <ng-container matColumnDef="registry">
+                      <th mat-header-cell *matHeaderCellDef> Registry </th>
+                      <td mat-cell *matCellDef="let element"> {{element.registry}} </td>
+                    </ng-container>
+                  
+                    <!-- Symbol Column -->
+                    <ng-container matColumnDef="productionstart">
+                      <th mat-header-cell *matHeaderCellDef> Production Start </th>
+                      <td mat-cell *matCellDef="let element"> {{element.productionstart}} </td>
+                    </ng-container>
+                    <!-- Symbol Column -->
+                    <ng-container matColumnDef="productionend">
+                      <th mat-header-cell *matHeaderCellDef> Production End </th>
+                      <td mat-cell *matCellDef="let element"> {{element.productionend}} </td>
+                    </ng-container>
+                    <!-- Symbol Column -->
+                    <ng-container matColumnDef="state">
+                      <th mat-header-cell *matHeaderCellDef> State </th>
+                      <td mat-cell *matCellDef="let element"> {{element.state}} </td>
+                    </ng-container>
+                  
+                    <!-- Symbol Column -->
+                    <ng-container matColumnDef="country">
+                        <th mat-header-cell *matHeaderCellDef> Country </th>
+                        <td mat-cell *matCellDef="let element"> {{element.country}} </td>
+                      </ng-container>
+
+                    <!-- Symbol Column -->
+                    <ng-container matColumnDef="site">
+                      <th mat-header-cell *matHeaderCellDef> Site </th>
+                      <td mat-cell *matCellDef="let element"> {{element.site}} </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                  
+                    <!-- Row shown when there is no matching data. -->
+                    <tr class="mat-row" *matNoDataRow>
+                      <td class="mat-cell" colspan="4">No data matching the filter "{{input.value}}"</td>
+                    </tr>
+                  </table>
+
+            </div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,70 @@
+<h1 mat-dialog-title>Create Pricing Task</h1>
+<div mat-dialog-content>
+    <form [formGroup]="pricingTaskForm">
+
+        <mat-form-field appearance="outline"   >
+            <mat-label>Window year length</mat-label>
+            <input matInput type="text"  formControlName="year_window_len" >
+          </mat-form-field>
+     
+        <mat-form-field appearance="outline" >
+            <mat-label>Store</mat-label>
+            <mat-select formControlName="store"  >
+                <mat-option   [value]="true">
+                    Yes
+                </mat-option>
+                
+                <mat-option   [value]="true">
+                    No
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+   
+    
+        <mat-form-field appearance="outline" >
+            <mat-label>Subside </mat-label>
+            <mat-select formControlName="use_subside" >
+                <mat-option   [value]="true">
+                    Yes
+                </mat-option>
+                
+                <mat-option   [value]="true">
+                    No
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+     
+        <mat-form-field appearance="outline" >
+            <mat-label>Reuse Proxy  </mat-label>
+            <mat-select formControlName="reuse_computed_proxy" >
+                <mat-option   [value]="true">
+                    Yes
+                </mat-option>
+                
+                <mat-option   [value]="true">
+                    No
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    
+        <mat-form-field appearance="outline" >
+            <mat-label>Estimator Order  </mat-label>
+            <mat-select formControlName="estimator_order">
+                <mat-option   [value]="'Standard'">
+                    Standard
+                </mat-option>
+                
+                <mat-option   [value]="'Wind'">
+                    Wind
+                </mat-option>
+                <mat-option   [value]="'Solar'">
+                    Solar
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+     
+    <button   mat-raised-button  type="button" color="primary" [disabled]="!pricingTaskForm.valid" (click)="createPricingTask()"> Create </button> 
+</form>
+     
+   
+</div>

@@ -1,0 +1,410 @@
+<div id="forms" class="page-layout simple fullwidth" fxLayout="column">
+
+    <!-- HEADER -->
+    <div class="header accent p-24 h-160" fxLayout="row" fxLayoutAlign="start center">
+        <div fxLayout="column" fxLayoutAlign="center start">
+            <div class="h1 mt-16">Import Assets</div>
+        </div>
+    </div>
+    <!-- / HEADER -->
+
+    <!-- CONTENT -->
+    <div class="content p-24" *ngIf="tenderForm">
+
+        <div class="vertical-stepper-wrapper">
+
+            <!-- VERTICAL STEPPER EXAMPLE -->
+            <mat-vertical-stepper #stepper class="mat-elevation-z4" [linear]="true">
+
+                <mat-step [stepControl]="tenderForm" [stepControl]="verticalStepperStep3">
+
+                    <form fxLayout="column" [formGroup]="tenderForm">
+
+                        <ng-template matStepLabel>Select</ng-template>
+
+                        <div fxFlex="1 0 auto" fxLayout="column">
+                            <div fxLayout="row" fxLayoutAlign="start center" fxFlex="1 0 auto">
+
+                                <mat-form-field appearance="outline" fxFlex="100">
+                                    <input type="text" placeholder="Select Tender" matInput formControlName="tender"
+                                        [matAutocomplete]="autoTenders">
+                                    <mat-autocomplete autoActiveFirstOption #autoTenders="matAutocomplete">
+                                        <mat-option *ngFor="let option of filteredtenders | async" [value]="option">
+                                            {{option.name}}
+                                        </mat-option>
+                                    </mat-autocomplete>
+                                </mat-form-field>
+
+                                <!-- 
+                                  /* Tenders list removed  and replaced with autocomplate   above L28 */ 
+                                  
+                                  <mat-form-field appearance="outline" fxFlex="100">
+                                    <mat-label>Tenders List</mat-label>
+                                    <mat-select formControlName="tender">
+                                        <mat-option *ngFor="let t of tenders$ | async" [value]="t.id">
+                                            {{t.name}}
+                                        </mat-option>
+                                    </mat-select>
+                                    
+                                </mat-form-field> -->
+
+
+                            </div>
+
+                            <mat-form-field appearance="outline" fxFlex="100">
+                                <mat-label>Import Template (optional)</mat-label>
+                                <mat-select>
+                                    <mat-option *ngFor="let template of templateConfig?.objects " [value]="template.id">
+                                        {{template.name}}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+
+                        </div>
+
+                        <div fxLayout="row" fxLayoutAlign="center center">
+                            <button class="mr-8" color="primary" type="button" mat-raised-button
+                                (click)="clearTenderForm()">Clear</button>
+                            <button [disabled]="tenderForm.invalid" mat-raised-button (click)="goForward()"
+                                type="button" color="primary">
+                                Next
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </mat-step>
+
+                <mat-step [stepControl]="fileForm">
+
+                    <form fxLayout="column" fxFlexAlign="center" [formGroup]="fileForm">
+
+                        <ng-template matStepLabel>Upload File Or Manual Add</ng-template>
+
+                        <div fxFlex="1 0 auto" fxLayout="row"
+                            style="align-items: center!important;border: 1px orange solid;padding: 10px;margin-top: 2em;">
+                            <div>
+
+                                <p>
+                                    The excel file should be a Yellowstork file (already known template by the system)
+                                    or a basic format:
+
+                                </p>
+                                <ul>
+                                    <li>
+                                        First row are the headers / titles
+                                    </li>
+                                    <li>
+                                        No blank columns between the data
+
+                                    </li>
+                                    <li>
+                                        No blank rows between the data
+                                    </li>
+                                    <li>
+                                        All data in the first tab
+                                    </li>
+                                    <li>
+                                        If you want to upload data for multiple sites: have a column with the site name
+                                        and the importer will take care of creating all sites
+                                    </li>
+                                </ul>
+
+                            </div>
+
+                        </div>
+                        <div fxFlex="1 0 auto" fxLayout="row" style="align-items: center!important;">
+                            <input style="display: none" type="file" (change)="onFileChanged($event)" #fileInput
+                                formControlName="file"
+                                accept=".xls,.xlsx,.xlsm ,.csv">
+
+                            <div mat-button type="button" color="primary" class="uploadfile-button"
+                                (click)="fileInput.click()" [class.emptyFile]="!selectedFile" appFileDragDrop
+                                (onFileDropped)="dragFile($event)">
+                                <div *ngIf="!selectedFile">
+                                    Drag / Click to Select File
+                                </div>
+                                <div *ngIf="selectedFile">
+                                    File selected: <span
+                                        style="color:#009688;display: block;word-break: break-all;">{{selectedFile.name}}</span>
+                                    <mat-progress-bar *ngIf="uploading" mode="buffer" [value]="progress">
+                                    </mat-progress-bar>
+                                    <span style="color:red;display: block;" *ngIf="errorMessage">Error :
+                                        {{errorMessage}}</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div fxLayout="row" fxLayoutAlign="center center">
+                            <button class="mr-8" mat-raised-button matStepperPrevious type="button" color="primary">
+                                Previous
+                            </button>
+                            <button (click)="importConfigurationOrSkip()" mat-raised-button
+                                [disabled]="!uploadWithSuccess" type="button" color="primary" class="mr-8">
+                                Next
+                            </button>
+                            <button (click)="importConfigurationOrSkip()" mat-raised-button
+                                [disabled]="uploadWithSuccess" type="button" color="basic"
+                                style="margin: 0px -8.5em 0px 5em;">
+                                Skip
+                            </button>
+                        </div>
+                    </form>
+
+                </mat-step>
+
+                <mat-step [stepControl]="verticalStepperStep3">
+
+                    <form class="wide" fxLayout="column" [formGroup]="verticalStepperStep3">
+
+                        <ng-template matStepLabel>Configure Import Template</ng-template>
+
+                        <app-template-configuration [colsFromFile]="colsFromFile"
+                            [colsFromPreview]="colsFromFilePreview" [target]="uploadFile?.import_config.config"
+                            [colsFromFileNotMapped]="colsFromFileNotMapped">
+                        </app-template-configuration>
+
+                        <div fxLayout="row" fxLayoutAlign="center center">
+                            <button class="mr-8" mat-raised-button matStepperPrevious type="button" color="primary">
+                                Previous
+                            </button>
+                            <button mat-raised-button (click)="saveConfiguration()" type="button" color="primary">
+                                Next
+                            </button>
+                        </div>
+
+                    </form>
+
+                </mat-step>
+
+                <mat-step [stepControl]="verticalStepperStep4" [editable]="!isFileValid">
+
+                    <form fxLayout="column" [formGroup]="verticalStepperStep3" class="form-fullwidth">
+
+                        <ng-template matStepLabel>Validation</ng-template>
+
+
+
+                        <div *ngIf="!isValidating" style="    width: 100%; display: table;">
+                            <div class="validation_methods_toggle">
+                                <mat-button-toggle-group name="validation_edit" value="e">
+                                    <mat-button-toggle value="d" (click)="validation_grid = false"
+                                        *ngIf="uploadWithSuccess">Download & Edit</mat-button-toggle>
+                                    <mat-button-toggle value="e" (click)="validation_grid = true">Edit Now
+                                    </mat-button-toggle>
+                                </mat-button-toggle-group>
+                            </div>
+                            <div *ngIf="!validation_grid" style="text-align: center;    width: 100%;margin:1em 0px">
+                                <p style="color:#009688;display: block;">The uploaded file contains invalid
+                                    informations, please find below the file with instructions. </p>
+                                <a (click)="uploadFileService.validateImportedFile(fileID);isDownloadFileStarted=true;"
+                                    style="cursor: pointer;">
+                                    <img *ngIf="!isDownloadFileStarted"
+                                        src="data:image/png;base64,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" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" *ngIf="isDownloadFileStarted"
+                                        xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; " width="300px"
+                                        height="50px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+                                        <g transform="rotate(0 50 50)">
+                                            <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                                                <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s"
+                                                    begin="-0.9166666666666666s" repeatCount="indefinite"></animate>
+                                            </rect>
+                                        </g>
+                                        <g transform="rotate(30 50 50)">
+                                            <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                                                <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s"
+                                                    begin="-0.8333333333333334s" repeatCount="indefinite"></animate>
+                                            </rect>
+                                        </g>
+                                        <g transform="rotate(60 50 50)">
+                                            <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                                                <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s"
+                                                    begin="-0.75s" repeatCount="indefinite"></animate>
+                                            </rect>
+                                        </g>
+                                        <g transform="rotate(90 50 50)">
+                                            <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                                                <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s"
+                                                    begin="-0.6666666666666666s" repeatCount="indefinite"></animate>
+                                            </rect>
+                                        </g>
+                                        <g transform="rotate(120 50 50)">
+                                            <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                                                <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s"
+                                                    begin="-0.5833333333333334s" repeatCount="indefinite"></animate>
+                                            </rect>
+                                        </g>
+                                        <g transform="rotate(150 50 50)">
+                                            <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                                                <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s"
+                                                    begin="-0.5s" repeatCount="indefinite"></animate>
+                                            </rect>
+                                        </g>
+                                        <g transform="rotate(180 50 50)">
+                                            <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                                                <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s"
+                                                    begin="-0.4166666666666667s" repeatCount="indefinite"></animate>
+                                            </rect>
+                                        </g>
+                                        <g transform="rotate(210 50 50)">
+                                            <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                                                <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s"
+                                                    begin="-0.3333333333333333s" repeatCount="indefinite"></animate>
+                                            </rect>
+                                        </g>
+                                        <g transform="rotate(240 50 50)">
+                                            <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                                                <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s"
+                                                    begin="-0.25s" repeatCount="indefinite"></animate>
+                                            </rect>
+                                        </g>
+                                        <g transform="rotate(270 50 50)">
+                                            <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                                                <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s"
+                                                    begin="-0.16666666666666666s" repeatCount="indefinite"></animate>
+                                            </rect>
+                                        </g>
+                                        <g transform="rotate(300 50 50)">
+                                            <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                                                <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s"
+                                                    begin="-0.08333333333333333s" repeatCount="indefinite"></animate>
+                                            </rect>
+                                        </g>
+                                        <g transform="rotate(330 50 50)">
+                                            <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+                                                <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s"
+                                                    begin="0s" repeatCount="indefinite"></animate>
+                                            </rect>
+                                        </g>
+                                        <text class="small" y="55" x="100" font-size="22">Downloading ...</text>
+                                    </svg>
+
+                                </a>
+
+
+                            </div>
+                            <div *ngIf="validation_grid">
+                                <ag-grid-angular #agGrid style="min-width: 70vw;height: 500px;" class="ag-theme-alpine"
+                                    [singleClickEdit]="false" [gridOptions]="gridOptions" [columnDefs]="columnDefs"
+                                    [rowData]="rowData" [enableRangeSelection]="true" [enableFillHandle]="true"
+                                    [enableCellChangeFlash]="true" [frameworkComponents]="frameworkComponents"
+                                    [tooltipShowDelay]="0" [modules]="modules">
+                                </ag-grid-angular>
+                                <div class="grid-legend">
+                                    <ul style="list-style-type: none;padding-left: 0px;">
+                                        <li style="padding-right:2em;display:inline-block"><i class="message-level-10"
+                                                style="display:inline-block;width: 10px;height:10px;margin-right:5px;vertical-align:bottom;"></i>Info
+                                        </li>
+                                        <li style="padding-right:2em;display:inline-block"><i class="message-level-20"
+                                                style="display:inline-block;width: 10px;height:10px;margin-right:5px;vertical-align:bottom;"></i>Suggestion
+                                        </li>
+                                        <li style="padding-right:2em;display:inline-block"><i class="message-level-30"
+                                                style="display:inline-block;width: 10px;height:10px;margin-right:5px;vertical-align:bottom;"></i>Warning
+                                        </li>
+                                        <li style="padding-right:2em;display:inline-block"><i class="message-level-35"
+                                                style="display:inline-block;width: 10px;height:10px;margin-right:5px;vertical-align:bottom;"></i>Autofill
+                                        </li>
+                                        <li style="padding-right:2em;display:inline-block"><i class="message-level-40"
+                                                style="display:inline-block;width: 10px;height:10px;margin-right:5px;vertical-align:bottom;"></i>Error
+                                        </li>
+                                    </ul>
+
+
+
+
+                                    <ul style="list-style-type: none;">
+                                        <li style="padding-right:2em;display:inline-block">
+                                            <button mat-raised-button color="primary" (click)="exportAsExcelFile()">
+                                                Export</button>
+                                        </li>
+
+                                    </ul>
+                                </div>
+                                <ng-container *ngIf="rowData.length && !!parseFloat(rowData[0]?.assetlatitude) && !!parseFloat(rowData[0]?.assetlongitude)">
+ 
+                                    <google-map width="100%"
+                                        [center]="{ lat: parseFloat(rowData[0]?.assetlatitude), lng: parseFloat(rowData[0]?.assetlongitude) }"
+                                        [zoom]="4">
+                                        <ng-container *ngFor="let row of rowData;let i = index;">
+                                            <map-marker *ngIf="!!row?.assetlatitude && !!row?.assetlongitude"
+                                                [position]="{ lat: parseFloat(row?.assetlatitude) , lng: parseFloat(row?.assetlongitude) }"
+                                                [icon]="'/assets/icons/map/marker-icon.png'"></map-marker>
+                                        </ng-container>
+
+                                    </google-map>
+                                </ng-container>
+
+
+                            </div>
+
+                        </div>
+
+                        <div fxFlex="1 0 auto" fxLayout="row" style="align-items: center!important;"
+                            *ngIf="isValidating">
+                            <div style="text-align: center;    width: 100%;margin:1em 0px">
+                                <p style="color:#009688;display: block;">The uploaded file is pending validation ,
+                                    please be patient ! </p>
+
+
+
+                            </div>
+
+                        </div>
+
+
+                        <div fxLayout="row" fxLayoutAlign="center center" *ngIf="!isValidating"
+                            style="margin-top: 2em;">
+                            <button class="mr-8" mat-raised-button matStepperPrevious type="button" color="basic"
+                                (click)="isDownloadFileStarted=false">
+                                Back
+                            </button>
+
+                            <button class="mr-8" mat-raised-button type="button" color="primary"
+                                (click)="reValidateCSV()" *ngIf="validation_grid && isGridEmpty()">
+                                Revalidate
+                            </button>
+                            <button class="mr-8" mat-raised-button type="button" color="accent" (click)="buildAssets()"
+                                *ngIf="isFileValid">
+                                Start import
+                            </button>
+                        </div>
+
+                    </form>
+
+                </mat-step>
+
+                <mat-step [editable]="!isValidating">
+
+                    <ng-template matStepLabel>Done</ng-template>
+
+                    <div class="h2 m-16" fxLayout="row" fxLayoutAlign="center center">
+                        The file has been successfully imported.
+                    </div>
+                    <div class="h2 m-16" fxLayout="row" fxLayoutAlign="center center"
+                        *ngIf="!!buildFileResult && (buildFileResult?.Asset?.updated > 0 || buildFileResult?.ServicePoint?.updated > 0 || buildFileResult?.Site?.updated >0 || buildFileResult?.Machine?.updated > 0 )">
+                        Tender has been successfully updated , {{buildFileResult.Asset.updated}} Assets ,
+                        {{buildFileResult.ServicePoint.updated}} Service Point ,{{buildFileResult.Site.updated}} Site
+                        and {{ buildFileResult.Machine.updated}} Machine.
+                    </div>
+                    <div class="h2 m-16" fxLayout="row" fxLayoutAlign="center center"
+                        *ngIf="buildFileResult && (buildFileResult?.Asset?.updated == 0 && buildFileResult?.ServicePoint?.updated == 0 && buildFileResult?.Site?.updated == 0 && buildFileResult?.Machine?.updated == 0 && buildFileResult?.Asset?.created == 0 && buildFileResult?.ServicePoint?.created == 0 && buildFileResult?.Site?.created == 0 && buildFileResult?.Machine?.created == 0 )">
+                        Tender is up to date with imported file.
+                    </div>
+                    <div fxLayout="row" fxLayoutAlign="center center">
+
+                        <a mat-raised-button [routerLink]="['/apps/tenders/'+tenderId]" color="primary">Show Tender</a>
+                    </div>
+
+                </mat-step>
+
+            </mat-vertical-stepper>
+            <!-- / VERTICAL STEPPER EXAMPLE -->
+
+        </div>
+
+    </div>
+    <!-- / CONTENT -->
+
+</div>

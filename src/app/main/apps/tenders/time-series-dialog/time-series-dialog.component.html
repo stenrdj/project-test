@@ -1,0 +1,220 @@
+<div class="time-series_upload" *ngIf="showUpload">
+   <form fxlayout="column" fxflexalign="center" [formGroup]="fileForm">
+ <div  >
+    <h2  fxlayout="row" fxFlex fxlayoutalign="start center">Timeseries Uploads </h2>
+
+     <button mat-button color="primary"   (click)="showUpload = false" fxFlex  fxlayout="row" fxlayoutalign="end end" class="button">
+        <span>List</span>  
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+
+</div>
+	<div fxflex="1 0 auto" fxlayout="row" style="align-items: center!important;">
+		<input style="display: none" type="file" (change)="onFileChanged($event)" #fileInput formcontrolname="file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+
+		<div mat-button type="button" color="primary" class="uploadfile-button" (click)="fileInput.click()" [class.emptyFile]="!selectedFile" appFileDragDrop (onFileDropped)="dragFile($event)">
+			<div *ngIf="!selectedFile">
+				Drag / Click to Select  File
+			</div>
+			<div *ngIf="selectedFile">
+				File selected:
+				<span style="color:#009688;display: block;">{{selectedFile.name}}</span>
+				<mat-progress-bar *ngIf="uploading" mode="buffer" [value]="progress"></mat-progress-bar>
+				<span style="color:red;display: block;" *ngIf="errorMessage">Error :
+					{{errorMessage}}</span>
+			</div>
+		</div>
+	</div>
+    <div fxflex="1 0 auto" fxlayout="row" style="text-align: center;">
+        
+        <mat-button-toggle-group name="uploadType" aria-label="Upload type"  formControlName="uploadType" multiple>
+            <mat-button-toggle value="tender">Tender</mat-button-toggle>
+            <mat-button-toggle value="asset">Asset</mat-button-toggle>
+            <mat-button-toggle value="site">Site</mat-button-toggle>
+        </mat-button-toggle-group>
+          
+ 
+    </div>
+    <div fxflex="1 0 auto" fxlayout="row"  class="mt-8 mx-auto" style="max-width: 300px;" *ngIf="fileForm.get('uploadType').value.includes('asset')">
+
+        <mat-form-field  appearance="outline" *ngIf="!fileForm.get('assetId').value" style="width: 100%;">
+
+            <mat-label>Choose an Asset:</mat-label>
+            <input type="text"
+                   placeholder="Choose an Asset"
+                    matInput
+                    formControlName="assetId"
+                   [matAutocomplete]="assetAuto">
+            <mat-autocomplete autoActiveFirstOption #assetAuto="matAutocomplete">
+              <mat-option *ngFor="let asset of data.tender?.assets " [value]="{id:asset.id,name:asset.name}">
+                {{asset.name}}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+          <mat-card *ngIf="fileForm.get('assetId').value" (click)="fileForm.get('assetId').setValue('')" style="cursor: pointer;">For asset : {{fileForm.get('assetId').value.name}}</mat-card>
+
+    </div>
+    <div fxflex="1 0 auto" fxlayout="row"   class="mt-8 mx-auto" style="max-width: 300px;" *ngIf="fileForm.get('uploadType').value.includes('site')">
+
+        <mat-form-field  appearance="outline" *ngIf="!fileForm.get('siteId').value" style="width: 100%;">
+
+            <mat-label>Choose Site:</mat-label>
+            <input type="text"
+                   placeholder="Choose a Site"
+                    matInput
+                    formControlName="siteId"
+                   [matAutocomplete]="siteAuto">
+            <mat-autocomplete autoActiveFirstOption #siteAuto="matAutocomplete">
+              <mat-option *ngFor="let site of data.tender?.sites " [value]="{id:site.id,name:site.name}">
+                {{site.name}}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+          <mat-card *ngIf="fileForm.get('siteId').value" (click)="fileForm.get('siteId').setValue('')" style="cursor: pointer;">For Site : {{fileForm.get('siteId').value.name}}</mat-card>
+
+    </div>
+    <div fxflex="1 0 auto" fxlayout="row" style="text-align: center;">
+        <button class="mt-8" mat-raised-button  type="button" color="primary" (click)="upload()" [disabled]="!fileForm.get('uploadType').value.length">
+             Upload
+           <svg xmlns="http://www.w3.org/2000/svg" *ngIf="uploading"
+        xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; " width="50px" height="50px"
+        viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+        <g transform="rotate(0 50 50)">
+          <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+            <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.9166666666666666s"
+              repeatCount="indefinite"></animate>
+          </rect>
+        </g>
+        <g transform="rotate(30 50 50)">
+          <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+            <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.8333333333333334s"
+              repeatCount="indefinite"></animate>
+          </rect>
+        </g>
+        <g transform="rotate(60 50 50)">
+          <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+            <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.75s"
+              repeatCount="indefinite"></animate>
+          </rect>
+        </g>
+        <g transform="rotate(90 50 50)">
+          <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+            <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.6666666666666666s"
+              repeatCount="indefinite"></animate>
+          </rect>
+        </g>
+        <g transform="rotate(120 50 50)">
+          <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+            <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.5833333333333334s"
+              repeatCount="indefinite"></animate>
+          </rect>
+        </g>
+        <g transform="rotate(150 50 50)">
+          <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+            <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.5s"
+              repeatCount="indefinite"></animate>
+          </rect>
+        </g>
+        <g transform="rotate(180 50 50)">
+          <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+            <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.4166666666666667s"
+              repeatCount="indefinite"></animate>
+          </rect>
+        </g>
+        <g transform="rotate(210 50 50)">
+          <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+            <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.3333333333333333s"
+              repeatCount="indefinite"></animate>
+          </rect>
+        </g>
+        <g transform="rotate(240 50 50)">
+          <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+            <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.25s"
+              repeatCount="indefinite"></animate>
+          </rect>
+        </g>
+        <g transform="rotate(270 50 50)">
+          <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+            <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.16666666666666666s"
+              repeatCount="indefinite"></animate>
+          </rect>
+        </g>
+        <g transform="rotate(300 50 50)">
+          <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+            <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="-0.08333333333333333s"
+              repeatCount="indefinite"></animate>
+          </rect>
+        </g>
+        <g transform="rotate(330 50 50)">
+          <rect x="47" y="24" rx="3" ry="6" width="6" height="12" fill="#0a7142">
+            <animate attributeName="opacity" values="1;0" keyTimes="0;1" dur="1s" begin="0s" repeatCount="indefinite">
+            </animate>
+          </rect>
+        </g>
+      </svg>
+        </button>
+        
+    </div>
+</form>
+ 
+</div>
+<div class="time-series_list" *ngIf="!showUpload">
+    <div  >
+        <h2  fxlayout="row" fxFlex fxlayoutalign="start center">Timeseries Uploads </h2>
+
+         <button mat-button color="primary"   (click)="showUpload = true" fxFlex  fxlayout="row" fxlayoutalign="end end" class="button">
+            <span>Upload</span>  
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+    
+    </div>
+    <div>
+        <div class="filters">
+            <ng-container *ngFor="let file of filesList">
+                <button mat-stroked-button [color]="selectedFilter == file.asset.name ? 'accent' : 'basic' " class="mr-8" *ngIf="file.asset_id" (click)="applyFilter(file.asset.name)" title="Asset {{file.asset.name}}">{{file.asset.name}}</button>
+                <button mat-stroked-button  [color]="selectedFilter == file.site.name ? 'accent' : '' "  class="mr-8" *ngIf="file.site_id" (click)="applyFilter(file.site.name)" title="Site {{file.site.name}}">{{file.site.name}}</button>
+            </ng-container>
+            
+        </div>
+            <table class="simple" >
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th style="width:100px;">Download</th>
+                    </tr>
+                </thead>
+                <tbody *ngIf="filesList">
+
+                    <tr *ngFor="let file of filesListFiltred">
+
+                        <td>
+                            <span>
+                                {{file.filename}} 
+
+                            </span>
+                        </td>
+                        <td style="width:100px;text-align:center">    
+                            <span>
+                                <a  (click)="_tenderService.downloadTimeSerieFile(file.id,file.filename)" style="cursor: pointer;"><mat-icon>cloud_download</mat-icon></a>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody> 
+                <tbody *ngIf="!filesList">
+
+                    <tr>
+
+                        <td colspan="2">
+                            <span>
+                                No file found!
+                            </span>
+                        </td>
+                         
+                    </tr>
+                </tbody> 
+            </table>
+    </div>
+
+</div>
+
+

@@ -1,0 +1,49 @@
+<div class="list mat-elevation-z1" fxLayout="column">
+
+    <!-- LIST HEADER -->
+    <div class="list-header" fxFlex fxLayout="row" fxLayoutAlign="space-between center">
+
+        <scrumboard-board-edit-list-name
+            fxFlex="1 0 auto"
+            [list]="list"
+            (listNameChanged)="onListNameChanged($event)">
+        </scrumboard-board-edit-list-name>
+
+        <div fxFlex="0 1 auto" *ngIf="list.id != 1 " >
+            <button mat-icon-button class="list-header-option-button" [matMenuTriggerFor]="listMenu">
+                <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #listMenu="matMenu">
+                <button mat-menu-item (click)="removeList(list.id)">Remove List</button>
+            </mat-menu>
+        </div>
+
+    </div>
+    <!-- / LIST HEADER -->
+
+    <!-- LIST CONTENT -->
+    <div class="list-content" fxLayout="column">
+
+        <div class="list-cards ngx-dnd-container"
+             [model]="listCardsIds" ngxDroppable="card" (drop)="onDrop($event)"
+             fusePerfectScrollbar #listScroll>
+             <ng-container *ngFor="let card of currentListCards;let index = index">
+                <scrumboard-board-card ngxDraggable
+                    (click)="openCardDialog(card)"
+                    class="scrumboard-board-card ngx-dnd-item"
+                     [model]="card.id"    
+                    [cardId]="card.id">
+                 </scrumboard-board-card>
+             </ng-container>
+             
+        </div>
+    </div>
+    <!-- / LIST CONTENT -->
+
+    <!-- NEW CARD BUTTON-->
+    <div class="list-footer">
+        <scrumboard-board-add-card (cardAdded)="onCardAdd($event)"></scrumboard-board-add-card>
+    </div>
+    <!-- / NEW CARD BUTTON-->
+
+</div>

@@ -1,0 +1,116 @@
+<div id="tenders-offers" class="page-layout carded fullwidth inner-scroll">
+
+    <!-- TOP BACKGROUND -->
+    <div class="top-bg accent"></div>
+    <!-- / TOP BACKGROUND -->
+
+    <!-- CENTER -->
+    <div class="center">
+
+        <!-- HEADER -->
+        <div class="header accent" fxLayout="column" fxLayoutAlign="center center" fxLayout.gt-xs="row"
+            fxLayoutAlign.gt-xs="space-between center">
+
+            <!-- APP TITLE -->
+            <div class="logo mb-24 mb-sm-0" fxLayout="row" fxLayoutAlign="start center">
+                <mat-icon class="logo-icon s-32 mr-16" [@animate]="{value:'*',params:{delay:'50ms',scale:'0.2'}}">
+                    receipt
+                </mat-icon>
+                <span class="logo-text h1" [@animate]="{value:'*',params:{delay:'100ms',x:'-25px'}}">Offers List</span>
+            </div>
+            <!-- / APP TITLE -->
+
+
+
+        </div>
+        <!-- / HEADER -->
+
+        <!-- CONTENT CARD -->
+        <div class="content-card">
+            <div class="content">
+
+
+                <mat-table class="orders-table" #table [dataSource]="dataSource" matSort
+                    [@animateStagger]="{value:'50'}" fusePerfectScrollbar>
+
+                    <!-- ID Column -->
+                    <ng-container matColumnDef="id">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>#</mat-header-cell>
+                        <mat-cell *matCellDef="let tender">
+                            <p class="text-truncate">{{tender.id}}</p>
+                        </mat-cell>
+                    </ng-container>
+
+                    <!-- Reference Column -->
+                    <ng-container matColumnDef="name">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Name</mat-header-cell>
+                        <mat-cell *matCellDef="let tender">
+                            <p class="text-truncate">{{tender.name}}</p>
+                        </mat-cell>
+                    </ng-container>
+
+                    <!-- Total Offers Column -->
+                    <ng-container matColumnDef="totaloffers">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Total Offers</mat-header-cell>
+                        <mat-cell *matCellDef="let tender">
+                            <p class="text-truncate">
+                                {{tender.offers.length}}
+                            </p>
+                        </mat-cell>
+                    </ng-container>
+
+                    <!-- Status Column -->
+                    <ng-container matColumnDef="status">
+                        <mat-header-cell *matHeaderCellDef mat-sort-header>Status</mat-header-cell>
+                        <mat-cell *matCellDef="let tender">
+
+                            <p class="text-truncate" *ngIf="tender.status">
+                                <span class="status h6 p-4 blue-500" *ngIf="tender.status == 'INITIAL'">
+                                    Initial
+                                </span>
+                                <span class="status h6 p-4 pink-900" *ngIf="tender.status == 'DATA_VALIDATION'">
+                                    Data Validation
+                                </span>
+                                <span class="status h6 p-4 blue-900" *ngIf="tender.status == 'WAITING'">
+                                    Waiting
+                                </span>
+                                <span class="status h6 p-4 orange-900" *ngIf="tender.status == 'PRICING'">
+                                    Pricing
+                                </span>
+                                <span class="status h6 p-4 green-900" *ngIf="tender.status == 'WON'">
+                                    Won
+                                </span>
+                                <span class="status h6 p-4 grey-900" *ngIf="tender.status == 'BOOKED'">
+                                    Booked
+                                </span>
+                                <span class="status h6 p-4 cyan-900" *ngIf="tender.status == 'INTEGRATED'">
+                                    Integrated
+                                </span>
+                                <span class="status h6 p-4 deep-orange-900" *ngIf="tender.status == 'OPERATIONAL'">
+                                    Operational
+                                </span>
+                            </p>
+                        </mat-cell>
+                    </ng-container>
+
+
+
+                    <mat-header-row *matHeaderRowDef="displayedColumns; sticky:true"></mat-header-row>
+
+                    <mat-row *matRowDef="let tender; columns: displayedColumns;" class="order" matRipple
+                        [routerLink]="'/apps/offers/'+tender.id">
+                    </mat-row>
+                </mat-table>
+
+                <mat-paginator #paginator [length]="dataSource?.filteredData.length" [pageIndex]="0" [pageSize]="10"
+                    [pageSizeOptions]="[5, 10, 25, 100]">
+                </mat-paginator>
+
+            </div>
+
+
+        </div>
+        <!-- / CONTENT CARD -->
+    </div>
+    <!-- / CENTER -->
+</div>
